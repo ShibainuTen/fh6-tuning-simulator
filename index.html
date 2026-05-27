@@ -576,8 +576,8 @@ function renderTuning(t, model) {
 
   g.innerHTML = [
     card('タイヤ空気圧','🫧',
-      pr('フロント', tp.front?.value??'-','PSI',tp.front?.percent,tp.front?.note)+
-      pr('リア',     tp.rear?.value??'-','PSI',tp.rear?.percent,tp.rear?.note)),
+      pr('フロント', tp.front?.value??'-','Bar',tp.front?.percent,tp.front?.note)+
+      pr('リア',     tp.rear?.value??'-','Bar',tp.rear?.percent,tp.rear?.note)),
 
     card('スタビライザー（ARB）','🔩',
       pr('フロント', arb.front?.value??'-','',null,arb.front?.note)+
@@ -639,8 +639,8 @@ document.getElementById('copyBtn').addEventListener('click', () => {
     `用途: ${document.getElementById('purpose').value || '-'}`,
     '',
     '■ タイヤ空気圧',
-    `  フロント: ${t.tirePressure?.front?.value??'-'} PSI`,
-    `  リア: ${t.tirePressure?.rear?.value??'-'} PSI`,
+    `  フロント: ${t.tirePressure?.front?.value??'-'} Bar`,
+    `  リア: ${t.tirePressure?.rear?.value??'-'} Bar`,
     '',
     '■ スタビライザー（ARB）',
     `  フロント: ${t.arb?.front?.value??'-'}`,
