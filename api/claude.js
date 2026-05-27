@@ -57,11 +57,17 @@ ${resumeSection}
 以下のJSON形式のみで回答してください。余分なテキスト・コードブロック記号は不要です：
 
 {
+  "tirePressure": {
+    "front": { "value": <PSI数値>, "percent": <0-100>, "note": "<説明>" },
+    "rear":  { "value": <PSI数値>, "percent": <0-100>, "note": "<説明>" }
+  },
   "arb": {
     "front": { "value": <数値mm>, "note": "<説明>" },
     "rear":  { "value": <数値mm>, "note": "<説明>" }
   },
   "springs": {
+    "rideHeightFront": { "value": <cm>, "note": "<説明>" },
+    "rideHeightRear":  { "value": <cm>, "note": "<説明>" },
     "front": { "value": <kgf/mm>, "percent": <0-100>, "note": "<説明>" },
     "rear":  { "value": <kgf/mm>, "percent": <0-100>, "note": "<説明>" }
   },

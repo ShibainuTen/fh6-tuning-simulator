@@ -74,6 +74,7 @@
     .cb[data-c="S1"]{color:var(--S1);border-color:var(--S1);} .cb[data-c="S1"].on{background:var(--S1);color:#000;}
     .cb[data-c="S2"]{color:var(--S2);border-color:var(--S2);} .cb[data-c="S2"].on{background:var(--S2);color:#000;}
     .cb[data-c="R"]{color:var(--R);border-color:var(--R);} .cb[data-c="R"].on{background:var(--R);color:#000;}
+    .cb[data-c="X"]{color:var(--X);border-color:var(--X);} .cb[data-c="X"].on{background:var(--X);color:#fff;}
     /* CAR LIST */
     .car-list{height:160px;overflow-y:auto;border-bottom:1px solid var(--border);flex-shrink:0;}
     .car-list::-webkit-scrollbar{width:3px;}
@@ -249,6 +250,7 @@
         <button class="cb" data-c="S1">S1</button>
         <button class="cb" data-c="S2">S2</button>
         <button class="cb" data-c="R">R</button>
+        <button class="cb" data-c="X">X</button>
       </div>
     </div>
     <div class="car-list" id="carList"></div>
@@ -297,8 +299,7 @@
           <div class="flbl">駆動系 <span class="opt">任意</span></div>
           <select class="si" id="drivetrain">
             <option value="">AI補完</option>
-            <option>FR</option><option>FF</option><option>MR</option>
-            <option>RR</option><option>AWD</option><option>4WD</option>
+            <option>AWD</option><option>RWD</option><option>4WD</option>
           </select>
         </div>
       </div>
@@ -569,18 +570,24 @@ function renderTuning(t, model) {
   document.getElementById('resSummary').textContent = t.summary || '';
 
   const g = document.getElementById('tuneGrid');
-  const arb = t.arb || {}, sp = t.springs || {}, dm = t.damping || {};
+  const tp = t.tirePressure || {}, arb = t.arb || {}, sp = t.springs || {}, dm = t.damping || {};
   const al = t.alignment || {}, ae = t.aero || {}, br = t.brakes || {};
   const df = t.diff || {}, gr = t.gears || {};
 
   g.innerHTML = [
-    card('ARB','🔩',
-      pr('フロント', arb.front?.value??'-','mm',null,arb.front?.note)+
-      pr('リア',     arb.rear?.value??'-','mm',null,arb.rear?.note)),
+    card('タイヤ空気圧','🫧',
+      pr('フロント', tp.front?.value??'-','PSI',tp.front?.percent,tp.front?.note)+
+      pr('リア',     tp.rear?.value??'-','PSI',tp.rear?.percent,tp.rear?.note)),
 
-    card('スプリング','🌀',
-      pr('フロント', sp.front?.value??'-','kgf/mm',sp.front?.percent,sp.front?.note)+
-      pr('リア',     sp.rear?.value??'-','kgf/mm',sp.rear?.percent,sp.rear?.note)),
+    card('スタビライザー（ARB）','🔩',
+      pr('フロント', arb.front?.value??'-','',null,arb.front?.note)+
+      pr('リア',     arb.rear?.value??'-','',null,arb.rear?.note)),
+
+    card('スプリング・車高','🌀',
+      pr('車高フロント',  sp.rideHeightFront?.value??'-','cm',null,sp.rideHeightFront?.note)+
+      pr('車高リア',      sp.rideHeightRear?.value??'-','cm',null,sp.rideHeightRear?.note)+
+      pr('スプリングF',   sp.front?.value??'-','kgf/mm',sp.front?.percent,sp.front?.note)+
+      pr('スプリングR',   sp.rear?.value??'-','kgf/mm',sp.rear?.percent,sp.rear?.note)),
 
     card('ダンピング','📉',
       pr('フロントバンプ',    dm.frontBump?.value??'-','',dm.frontBump?.percent,dm.frontBump?.note)+
@@ -628,16 +635,20 @@ document.getElementById('copyBtn').addEventListener('click', () => {
     'FH6 チューニングシート',
     '═══════════════════════════════',
     `車両: ${selCar.make} ${selCar.model} ${selCar.year}`,
-    `クラス: ${selCar.cls}  PI: ${selCar.pi}`,
+    `クラス: ${selCar.cls}`,
     `用途: ${document.getElementById('purpose').value || '-'}`,
     '',
-    '■ ARB',
-    `  フロント: ${t.arb?.front?.value??'-'} mm`,
-    `  リア: ${t.arb?.rear?.value??'-'} mm`,
+    '■ タイヤ空気圧',
+    `  フロント: ${t.tirePressure?.front?.value??'-'} PSI`,
+    `  リア: ${t.tirePressure?.rear?.value??'-'} PSI`,
     '',
-    '■ スプリング',
-    `  フロント: ${t.springs?.front?.value??'-'} kgf/mm`,
-    `  リア: ${t.springs?.rear?.value??'-'} kgf/mm`,
+    '■ スタビライザー（ARB）',
+    `  フロント: ${t.arb?.front?.value??'-'}`,
+    `  リア: ${t.arb?.rear?.value??'-'}`,
+    '',
+    '■ スプリング・車高',
+    `  車高 F/R: ${t.springs?.rideHeightFront?.value??'-'} / ${t.springs?.rideHeightRear?.value??'-'} cm`,
+    `  スプリング F/R: ${t.springs?.front?.value??'-'} / ${t.springs?.rear?.value??'-'} kgf/mm`,
     '',
     '■ ダンピング',
     `  フロントバンプ/リバウンド: ${t.damping?.frontBump?.value??'-'} / ${t.damping?.frontRebound?.value??'-'}`,
