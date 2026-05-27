@@ -505,8 +505,9 @@ async function doTune(feedback) {
     const d = await r.json();
     if (!r.ok || !d.tuning) throw new Error(d.error || 'API error');
     curTuning = d.tuning;
-    renderTuning(d.tuning);
+    renderTuning(d.tuning, d.model);
     saveHist(d.tuning);
+    if (d.model === 'gemini') toast('⚡ Claude上限のためGeminiで提案しました', '#8b5cf6');
   } catch(e) {
     document.getElementById('loadingState').classList.remove('v');
     document.getElementById('emptyState').classList.remove('hide');
@@ -555,13 +556,16 @@ function card(ttl, ico, html, fw) {
   return `<div class="tcard${fw?' fw':''}"><div class="chdr">${ico} ${ttl}</div><div class="cbdy">${html}</div></div>`;
 }
 
-function renderTuning(t) {
+function renderTuning(t, model) {
   document.getElementById('loadingState').classList.remove('v');
   document.getElementById('resultBlock').classList.add('v');
   document.getElementById('resName').textContent = selCar.make + ' ' + selCar.model;
-  document.getElementById('resMeta').textContent =
+  const modelBadge = model === 'gemini'
+    ? ' <span style="font-size:9px;background:#8b5cf6;color:#fff;padding:1px 6px;border-radius:20px;font-weight:700;">⚡ Gemini</span>'
+    : ' <span style="font-size:9px;background:#ef4444;color:#fff;padding:1px 6px;border-radius:20px;font-weight:700;">Claude</span>';
+  document.getElementById('resMeta').innerHTML =
     selCar.year + ' · Class ' + selCar.cls + ' · ' +
-    (document.getElementById('purpose').value || 'チューニング提案');
+    (document.getElementById('purpose').value || 'チューニング提案') + modelBadge;
   document.getElementById('resSummary').textContent = t.summary || '';
 
   const g = document.getElementById('tuneGrid');

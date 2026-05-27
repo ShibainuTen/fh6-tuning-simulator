@@ -8,32 +8,27 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    return res.status(500).json({ error: 'ANTHROPIC_API_KEY is not set' });
-  }
+  const claudeKey = process.env.ANTHROPIC_API_KEY;
+  const geminiKey = process.env.GEMINI_API_KEY;
 
   let body = req.body;
-  // body が文字列の場合（自動パースされていない環境）は手動パース
   if (typeof body === 'string') {
     try { body = JSON.parse(body); } catch { body = {}; }
   }
   body = body || {};
 
   const { car, specs, feedback, resumeData } = body;
-  if (!car) {
-    return res.status(400).json({ error: 'car data required' });
-  }
+  if (!car) return res.status(400).json({ error: 'car data required' });
 
   const specLines = [
-    specs?.power     ? `出力: ${specs.power} kW`           : '出力: 不明（AI推定）',
-    specs?.torque    ? `トルク: ${specs.torque} Nm`         : 'トルク: 不明（AI推定）',
-    specs?.weight    ? `車重: ${specs.weight} kg`           : '車重: 不明（AI推定）',
-    specs?.frontBias ? `フロント配分: ${specs.frontBias}%`  : 'フロント配分: 不明（AI推定）',
-    specs?.tires     ? `タイヤ: ${specs.tires}`             : 'タイヤ: 不明（AI推定）',
-    specs?.drivetrain? `駆動系: ${specs.drivetrain}`        : '駆動系: 不明（AI推定）',
-    specs?.purpose    ? `用途: ${specs.purpose}`              : '用途: 不明（AI推定）',
-    specs?.gearCount  ? `ギア数: ${specs.gearCount}速`        : 'ギア数: 不明（AI推定）',
+    specs?.power      ? `出力: ${specs.power} kW`           : '出力: 不明（AI推定）',
+    specs?.torque     ? `トルク: ${specs.torque} Nm`         : 'トルク: 不明（AI推定）',
+    specs?.weight     ? `車重: ${specs.weight} kg`           : '車重: 不明（AI推定）',
+    specs?.frontBias  ? `フロント配分: ${specs.frontBias}%`  : 'フロント配分: 不明（AI推定）',
+    specs?.tires      ? `タイヤ: ${specs.tires}`             : 'タイヤ: 不明（AI推定）',
+    specs?.drivetrain ? `駆動系: ${specs.drivetrain}`        : '駆動系: 不明（AI推定）',
+    specs?.purpose    ? `用途: ${specs.purpose}`             : '用途: 不明（AI推定）',
+    specs?.gearCount  ? `ギア数: ${specs.gearCount}速`       : 'ギア数: 不明（AI推定）',
   ].join('\n');
 
   const feedbackSection = feedback
@@ -105,39 +100,79 @@ ${resumeSection}
   "summary": "<全体的なセッティング方針（日本語200字程度）>"
 }`;
 
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-opus-4-7',
-        max_tokens: 2048,
-        messages: [{ role: 'user', content: prompt }],
-      }),
-    });
+  // ── Claude 試行 ──────────────────────────────────────────
+  if (claudeKey) {
+    try {
+      const r = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': claudeKey,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: 'claude-opus-4-7',
+          max_tokens: 2048,
+          messages: [{ role: 'user', content: prompt }],
+        }),
+      });
 
-    if (!response.ok) {
-      const errText = await response.text();
-      return res.status(response.status).json({ error: errText });
+      // 429 / 529 以外のエラーはそのまま Gemini へ
+      const shouldFallback = r.status === 429 || r.status === 529;
+
+      if (r.ok) {
+        const data = await r.json();
+        const text = (data.content && data.content[0] && data.content[0].text) || '';
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const tuning = JSON.parse(jsonMatch[0]);
+          return res.status(200).json({ tuning, model: 'claude' });
+        }
+        // JSON 抽出失敗 → Gemini へ
+      } else if (!shouldFallback) {
+        const errText = await r.text();
+        return res.status(r.status).json({ error: errText });
+      }
+      // shouldFallback または JSON 抽出失敗 → 下の Gemini 処理へ続く
+    } catch (err) {
+      // ネットワークエラーなど → Gemini へ
+    }
+  }
+
+  // ── Gemini フォールバック ────────────────────────────────
+  if (!geminiKey) {
+    return res.status(503).json({ error: 'Claude rate limit exceeded and GEMINI_API_KEY is not set' });
+  }
+
+  try {
+    const r = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { maxOutputTokens: 2048, temperature: 0.7 },
+        }),
+      }
+    );
+
+    if (!r.ok) {
+      const errText = await r.text();
+      return res.status(r.status).json({ error: 'Gemini error: ' + errText });
     }
 
-    const data = await response.json();
-    const text = (data.content && data.content[0] && data.content[0].text) || '';
-
-    // JSON部分を抽出（コードブロック対応）
+    const data = await r.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      return res.status(500).json({ error: 'AI response did not contain valid JSON', raw: text });
+      return res.status(500).json({ error: 'Gemini response did not contain valid JSON', raw: text });
     }
 
     const tuning = JSON.parse(jsonMatch[0]);
-    return res.status(200).json({ tuning });
+    return res.status(200).json({ tuning, model: 'gemini' });
 
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: 'Gemini error: ' + err.message });
   }
 };
