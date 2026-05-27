@@ -32,7 +32,8 @@ module.exports = async function handler(req, res) {
     specs?.frontBias ? `フロント配分: ${specs.frontBias}%`  : 'フロント配分: 不明（AI推定）',
     specs?.tires     ? `タイヤ: ${specs.tires}`             : 'タイヤ: 不明（AI推定）',
     specs?.drivetrain? `駆動系: ${specs.drivetrain}`        : '駆動系: 不明（AI推定）',
-    specs?.purpose   ? `用途: ${specs.purpose}`             : '用途: 不明（AI推定）',
+    specs?.purpose    ? `用途: ${specs.purpose}`              : '用途: 不明（AI推定）',
+    specs?.gearCount  ? `ギア数: ${specs.gearCount}速`        : 'ギア数: 不明（AI推定）',
   ].join('\n');
 
   const feedbackSection = feedback
@@ -99,7 +100,7 @@ ${resumeSection}
   },
   "gears": {
     "finalDrive": { "value": <比>, "note": "<説明>" },
-    "ratios": [<1速から6速の数値配列>]
+    "ratios": [<指定ギア数分の数値配列。ギア数未指定なら車両クラスに適した段数で>]
   },
   "summary": "<全体的なセッティング方針（日本語200字程度）>"
 }`;

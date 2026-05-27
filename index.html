@@ -313,13 +313,26 @@
       </div>
       <div class="frow">
         <div class="fg">
+          <div class="flbl">ギア数 <span class="opt">任意</span></div>
+          <select class="si" id="gearCount">
+            <option value="">AI補完</option>
+            <option value="4">4速</option>
+            <option value="5">5速</option>
+            <option value="6">6速</option>
+            <option value="7">7速</option>
+            <option value="8">8速</option>
+            <option value="9">9速</option>
+            <option value="10">10速</option>
+          </select>
+        </div>
+        <div class="fg">
           <div class="flbl">ベストラップ <span class="opt">任意</span></div>
           <input class="si" id="lapTime" type="text" placeholder="1:23.456">
         </div>
-        <div class="fg">
-          <div class="flbl">セッション名 <span class="opt">任意</span></div>
-          <input class="si" id="sessionName" type="text" placeholder="富士テスト">
-        </div>
+      </div>
+      <div class="fg">
+        <div class="flbl">セッション名 <span class="opt">任意</span></div>
+        <input class="si" id="sessionName" type="text" placeholder="富士テスト">
       </div>
     </div>
 
@@ -467,6 +480,7 @@ function getSpecs() {
     tires:      document.getElementById('tires').value || null,
     drivetrain: document.getElementById('drivetrain').value || null,
     purpose:    document.getElementById('purpose').value || null,
+    gearCount:  document.getElementById('gearCount').value || null,
   };
 }
 
@@ -709,6 +723,7 @@ function resumeSess(entry) {
   document.getElementById('tires').value = s.tires || '';
   document.getElementById('drivetrain').value = s.drivetrain || '';
   document.getElementById('purpose').value = s.purpose || '';
+  document.getElementById('gearCount').value = s.gearCount || '';
   document.getElementById('lapTime').value = entry.lapTime || '';
   document.getElementById('sessionName').value = entry.sessionName || '';
   if (entry.tuning) { curTuning = entry.tuning; renderTuning(entry.tuning); }
