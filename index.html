@@ -9,7 +9,7 @@
     :root {
       --bg:#0a0b14;--surface:#111827;--surface2:#1f2937;--border:#374151;
       --accent:#ef4444;--accent2:#f97316;--text:#f9fafb;--text2:#9ca3af;--text3:#6b7280;
-      --D:#9ca3af;--C:#22c55e;--B:#3b82f6;--A:#a855f7;--S1:#eab308;--S2:#f97316;--X:#ef4444;
+      --D:#9ca3af;--C:#22c55e;--B:#3b82f6;--A:#a855f7;--S1:#eab308;--S2:#f97316;--X:#ef4444;--R:#e879f9;
       --r:8px;
     }
     *{box-sizing:border-box;margin:0;padding:0;}
@@ -95,6 +95,7 @@
     .bd-S1{background:rgba(234,179,8,.2);color:var(--S1);}
     .bd-S2{background:rgba(249,115,22,.2);color:var(--S2);}
     .bd-X{background:rgba(239,68,68,.2);color:var(--X);}
+    .bd-R{background:rgba(232,121,249,.2);color:var(--R);}
     .pi-lbl{font-size:10px;color:var(--text3);flex-shrink:0;}
     /* SELECTED CAR */
     .sel-car{
@@ -407,7 +408,7 @@ let selCar = null, curTuning = null, clsFilter = 'ALL';
 let hist = JSON.parse(localStorage.getItem('fh6h') || '[]');
 
 // ─── CARS ────────────────────────────────────────────────
-const CARS = CAR_DATA.map(([id,make,model,year,cls,pi]) => ({id,make,model,year,cls,pi}));
+const CARS = CAR_DATA.map((c, i) => ({id: i, make: c.make, model: c.model, year: c.year, cls: c.cls}));
 
 function filtered() {
   const q = document.getElementById('carSearch').value.toLowerCase();
@@ -429,7 +430,6 @@ function renderList() {
         <div class="ci-yr">${c.year}</div>
       </div>
       <span class="badge bd-${c.cls}">${c.cls}</span>
-      <span class="pi-lbl">${c.pi}</span>
     </div>`).join('');
   el.querySelectorAll('.ci').forEach(el =>
     el.addEventListener('click', () => pickCar(CARS.find(c => c.id == el.dataset.id)))
@@ -442,7 +442,7 @@ function pickCar(car) {
   document.getElementById('selCarYear').textContent = car.year;
   const cb = document.getElementById('selCarCls');
   cb.textContent = car.cls; cb.className = 'badge bd-' + car.cls;
-  document.getElementById('selCarPi').textContent = 'PI ' + car.pi;
+  document.getElementById('selCarPi').textContent = car.year + '年式';
   document.getElementById('selCarBox').classList.add('v');
   document.getElementById('tuneBtn').disabled = false;
   renderList();
@@ -543,7 +543,7 @@ function renderTuning(t) {
   document.getElementById('resultBlock').classList.add('v');
   document.getElementById('resName').textContent = selCar.make + ' ' + selCar.model;
   document.getElementById('resMeta').textContent =
-    selCar.year + ' · Class ' + selCar.cls + ' (PI ' + selCar.pi + ') · ' +
+    selCar.year + ' · Class ' + selCar.cls + ' · ' +
     (document.getElementById('purpose').value || 'チューニング提案');
   document.getElementById('resSummary').textContent = t.summary || '';
 

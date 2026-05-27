@@ -36,7 +36,7 @@ export default async function handler(req, res) {
 メーカー: ${car.make}
 モデル: ${car.model}
 年式: ${car.year}
-クラス: ${car.class} (PI: ${car.pi})
+クラス: ${car.cls || car.class}
 
 【スペック】
 ${specLines}
