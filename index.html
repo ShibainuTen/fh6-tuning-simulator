@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FH6 チューニングシミュレーター</title>
+  <script src="cars-data.js"></script>
+  <style>
+    :root {
+      --bg:#0a0b14;--surface:#111827;--surface2:#1f2937;--border:#374151;
+      --accent:#ef4444;--accent2:#f97316;--text:#f9fafb;--text2:#9ca3af;--text3:#6b7280;
+      --D:#9ca3af;--C:#22c55e;--B:#3b82f6;--A:#a855f7;--S1:#eab308;--S2:#f97316;--X:#ef4444;
+      --r:8px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      font-family:'Segoe UI',system-ui,sans-serif;
+      background:var(--bg);
+      background-image:
+        repeating-linear-gradient(-60deg,transparent,transparent 40px,rgba(239,68,68,.018) 40px,rgba(239,68,68,.018) 80px),
+        radial-gradient(ellipse at 15% 50%,rgba(239,68,68,.06) 0%,transparent 55%),
+        radial-gradient(ellipse at 85% 10%,rgba(249,115,22,.05) 0%,transparent 50%);
+      color:var(--text);min-height:100vh;overflow-x:hidden;
+    }
+    /* HEADER */
+    header{
+      background:linear-gradient(135deg,#1a0000 0%,#0a0b14 50%,#000a1a 100%);
+      border-bottom:2px solid var(--accent);padding:0 24px;height:60px;
+      display:flex;align-items:center;justify-content:space-between;
+      position:sticky;top:0;z-index:100;box-shadow:0 4px 24px rgba(239,68,68,.2);
+    }
+    .logo{display:flex;align-items:center;gap:12px;}
+    .logo-icon{
+      width:38px;height:38px;background:var(--accent);border-radius:8px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:16px;font-weight:900;color:#fff;box-shadow:0 0 16px rgba(239,68,68,.5);
+    }
+    .logo-text{font-size:18px;font-weight:800;letter-spacing:2px;
+      background:linear-gradient(135deg,#ef4444,#f97316);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .logo-sub{font-size:10px;color:var(--text3);letter-spacing:4px;text-transform:uppercase;}
+    .header-right{display:flex;gap:8px;align-items:center;}
+    .online-dot{width:7px;height:7px;background:#22c55e;border-radius:50%;box-shadow:0 0 6px #22c55e;}
+    /* LAYOUT */
+    .main{display:grid;grid-template-columns:400px 1fr;height:calc(100vh - 60px);overflow:hidden;}
+    /* LEFT */
+    .left{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+    .sec-hdr{
+      padding:9px 14px;font-size:10px;font-weight:700;letter-spacing:2px;
+      text-transform:uppercase;color:var(--accent);background:rgba(239,68,68,.05);
+      border-bottom:1px solid var(--border);flex-shrink:0;
+    }
+    /* CAR SEARCH */
+    .car-search{padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0;}
+    .search-row{display:flex;gap:6px;margin-bottom:8px;}
+    input.si,select.si{
+      background:var(--surface2);border:1px solid var(--border);border-radius:6px;
+      color:var(--text);padding:7px 10px;font-size:12px;outline:none;transition:border-color .2s;
+    }
+    input.si{flex:1;}
+    input.si:focus,select.si:focus{border-color:var(--accent);}
+    select.si option{background:var(--surface2);}
+    .cls-btns{display:flex;gap:5px;flex-wrap:wrap;}
+    .cb{
+      padding:3px 8px;border-radius:20px;border:1px solid transparent;
+      font-size:10px;font-weight:700;cursor:pointer;background:var(--surface2);transition:all .15s;
+    }
+    .cb[data-c="ALL"]{color:var(--text2);border-color:var(--text3);}
+    .cb[data-c="ALL"].on{background:var(--text3);color:#fff;}
+    .cb[data-c="D"]{color:var(--D);border-color:var(--D);} .cb[data-c="D"].on{background:var(--D);color:#000;}
+    .cb[data-c="C"]{color:var(--C);border-color:var(--C);} .cb[data-c="C"].on{background:var(--C);color:#000;}
+    .cb[data-c="B"]{color:var(--B);border-color:var(--B);} .cb[data-c="B"].on{background:var(--B);color:#fff;}
+    .cb[data-c="A"]{color:var(--A);border-color:var(--A);} .cb[data-c="A"].on{background:var(--A);color:#fff;}
+    .cb[data-c="S1"]{color:var(--S1);border-color:var(--S1);} .cb[data-c="S1"].on{background:var(--S1);color:#000;}
+    .cb[data-c="S2"]{color:var(--S2);border-color:var(--S2);} .cb[data-c="S2"].on{background:var(--S2);color:#000;}
+    .cb[data-c="X"]{color:var(--X);border-color:var(--X);} .cb[data-c="X"].on{background:var(--X);color:#fff;}
+    /* CAR LIST */
+    .car-list{height:160px;overflow-y:auto;border-bottom:1px solid var(--border);flex-shrink:0;}
+    .car-list::-webkit-scrollbar{width:3px;}
+    .car-list::-webkit-scrollbar-thumb{background:var(--accent);}
+    .ci{
+      padding:7px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.03);
+      display:flex;align-items:center;gap:7px;transition:background .12s;font-size:12px;
+    }
+    .ci:hover{background:rgba(239,68,68,.07);}
+    .ci.sel{background:rgba(239,68,68,.13);border-left:2px solid var(--accent);}
+    .ci-info{flex:1;min-width:0;}
+    .ci-name{font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .ci-yr{color:var(--text3);font-size:10px;}
+    .badge{padding:2px 5px;border-radius:3px;font-size:9px;font-weight:800;flex-shrink:0;}
+    .bd-D{background:rgba(156,163,175,.2);color:var(--D);}
+    .bd-C{background:rgba(34,197,94,.2);color:var(--C);}
+    .bd-B{background:rgba(59,130,246,.2);color:var(--B);}
+    .bd-A{background:rgba(168,85,247,.2);color:var(--A);}
+    .bd-S1{background:rgba(234,179,8,.2);color:var(--S1);}
+    .bd-S2{background:rgba(249,115,22,.2);color:var(--S2);}
+    .bd-X{background:rgba(239,68,68,.2);color:var(--X);}
+    .pi-lbl{font-size:10px;color:var(--text3);flex-shrink:0;}
+    /* SELECTED CAR */
+    .sel-car{
+      margin:8px 14px;padding:9px 12px;background:rgba(239,68,68,.07);
+      border:1px solid rgba(239,68,68,.25);border-radius:6px;display:none;flex-shrink:0;
+    }
+    .sel-car.v{display:block;}
+    .sel-car-name{font-weight:700;font-size:13px;}
+    .sel-car-sub{font-size:10px;color:var(--text3);margin-top:3px;display:flex;gap:6px;align-items:center;}
+    /* SPEC FORM */
+    .spec-form{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:7px;}
+    .spec-form::-webkit-scrollbar{width:3px;}
+    .spec-form::-webkit-scrollbar-thumb{background:var(--border);}
+    .frow{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+    .fg{display:flex;flex-direction:column;gap:3px;}
+    .fg.full{grid-column:span 2;}
+    .flbl{font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;display:flex;align-items:center;gap:4px;}
+    .opt{font-size:9px;color:var(--text3);background:var(--surface2);padding:1px 4px;border-radius:3px;font-weight:400;text-transform:none;letter-spacing:0;}
+    /* ACTIONS */
+    .actions{padding:10px 14px;border-top:1px solid var(--border);flex-shrink:0;display:flex;gap:7px;}
+    .btn{
+      padding:9px 14px;border-radius:6px;border:none;font-size:12px;font-weight:700;
+      cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px;
+    }
+    .btn-p{background:linear-gradient(135deg,var(--accent),#b91c1c);color:#fff;flex:1;
+      box-shadow:0 3px 10px rgba(239,68,68,.3);}
+    .btn-p:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(239,68,68,.4);}
+    .btn-p:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+    .btn-s{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
+    .btn-s:hover{background:var(--border);color:var(--text);}
+    /* RIGHT */
+    .right{display:grid;grid-template-rows:1fr 200px;overflow:hidden;}
+    .output{overflow-y:auto;padding:18px 20px;}
+    .output::-webkit-scrollbar{width:5px;}
+    .output::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+    /* EMPTY */
+    .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:14px;color:var(--text3);text-align:center;}
+    .empty.hide{display:none;}
+    .empty-icon{font-size:56px;opacity:.25;}
+    .empty h3{font-size:16px;font-weight:600;}
+    .empty p{font-size:12px;max-width:280px;line-height:1.6;}
+    /* LOADING */
+    .loading{display:none;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px;color:var(--text2);}
+    .loading.v{display:flex;}
+    .spin{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    /* RESULT */
+    .result{display:none;}
+    .result.v{display:block;}
+    .res-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:12px;}
+    .res-hdr h2{font-size:20px;font-weight:800;}
+    .res-hdr p{font-size:11px;color:var(--text3);margin-top:3px;}
+    .res-btns{display:flex;gap:6px;flex-shrink:0;}
+    .summary{
+      background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);
+      border-radius:6px;padding:12px 14px;margin-bottom:16px;font-size:12px;line-height:1.7;color:var(--text2);
+    }
+    /* GRID */
+    .tgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+    .tcard{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;transition:border-color .2s;}
+    .tcard:hover{border-color:rgba(239,68,68,.35);}
+    .tcard.fw{grid-column:span 2;}
+    .chdr{padding:7px 11px;background:rgba(255,255,255,.025);border-bottom:1px solid var(--border);font-size:9px;font-weight:700;color:var(--accent);letter-spacing:2px;text-transform:uppercase;}
+    .cbdy{padding:9px 11px;}
+    /* PARAM */
+    .pr{display:flex;align-items:center;gap:6px;padding:3px 0;}
+    .pr+.pr{border-top:1px solid rgba(255,255,255,.04);}
+    .pl{font-size:10px;color:var(--text3);width:105px;flex-shrink:0;}
+    .pv{font-size:13px;font-weight:700;color:var(--text);flex-shrink:0;min-width:44px;}
+    .pu{font-size:9px;color:var(--text3);font-weight:400;}
+    .pct{font-size:9px;padding:1px 5px;border-radius:20px;background:rgba(239,68,68,.13);color:var(--accent);font-weight:700;flex-shrink:0;}
+    .pbw{flex:1;height:3px;background:var(--surface2);border-radius:2px;overflow:hidden;}
+    .pb{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .5s;}
+    .pn{font-size:9px;color:var(--text3);margin-top:1px;padding-left:105px;line-height:1.4;}
+    /* GEAR TABLE */
+    .gtbl{width:100%;border-collapse:collapse;font-size:11px;margin-top:5px;}
+    .gtbl th{color:var(--text3);font-size:9px;text-transform:uppercase;letter-spacing:1px;padding:3px 8px;text-align:center;border-bottom:1px solid var(--border);}
+    .gtbl td{padding:3px 8px;text-align:center;color:var(--text);border-bottom:1px solid rgba(255,255,255,.04);}
+    /* FEEDBACK */
+    .fb-sec{background:var(--surface);border:1px solid var(--border);border-top:3px solid #3b82f6;border-radius:6px;padding:14px;margin-bottom:10px;}
+    .fb-ttl{font-size:10px;font-weight:700;color:#3b82f6;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
+    .fb-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;}
+    /* HISTORY */
+    .hist{background:var(--surface);border-top:1px solid var(--border);padding:10px 18px;overflow:hidden;display:flex;flex-direction:column;}
+    .hist-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-shrink:0;}
+    .hist-ttl{font-size:10px;font-weight:700;color:var(--text2);letter-spacing:2px;text-transform:uppercase;}
+    .hist-list{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;flex:1;}
+    .hist-list::-webkit-scrollbar{height:3px;}
+    .hist-list::-webkit-scrollbar-thumb{background:var(--border);}
+    .hcard{
+      flex-shrink:0;width:170px;background:var(--surface2);border:1px solid var(--border);
+      border-radius:6px;padding:9px;cursor:pointer;transition:all .2s;position:relative;
+    }
+    .hcard:hover{border-color:var(--accent);transform:translateY(-1px);}
+    .hcard.best{border-color:#eab308;background:rgba(234,179,8,.04);}
+    .best-ico{position:absolute;top:-6px;right:7px;font-size:13px;}
+    .hc-car{font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .hc-dt{font-size:9px;color:var(--text3);margin-top:2px;}
+    .hc-pur{font-size:9px;color:var(--text2);margin-top:3px;}
+    .hc-lap{font-size:11px;font-weight:700;color:#eab308;margin-top:3px;}
+    .hc-resume{font-size:9px;color:var(--accent);margin-top:5px;}
+    /* TOAST */
+    .toast{
+      position:fixed;bottom:20px;right:20px;background:#22c55e;color:#fff;
+      padding:9px 16px;border-radius:7px;font-size:12px;font-weight:600;
+      box-shadow:0 4px 14px rgba(0,0,0,.5);transform:translateY(80px);opacity:0;
+      transition:all .28s;z-index:9999;
+    }
+    .toast.v{transform:translateY(0);opacity:1;}
+    .no-res{padding:14px;text-align:center;color:var(--text3);font-size:11px;}
+    @media(max-width:860px){
+      .main{grid-template-columns:1fr;grid-template-rows:auto 1fr;height:auto;}
+      .left{max-height:55vh;}
+      .right{grid-template-rows:1fr auto;}
+      .tgrid{grid-template-columns:1fr;}
+      .tcard.fw{grid-column:span 1;}
+      .fb-grid{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">FH</div>
+    <div>
+      <div class="logo-text">TUNING SIMULATOR</div>
+      <div class="logo-sub">Forza Horizon 6 Edition</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span style="font-size:10px;color:var(--text3);letter-spacing:1px;">CLAUDE AI</span>
+    <div class="online-dot"></div>
+  </div>
+</header>
+
+<div class="main">
+  <!-- LEFT PANEL -->
+  <div class="left">
+    <div class="sec-hdr">🏎 車両選択</div>
+    <div class="car-search">
+      <div class="search-row">
+        <input class="si" id="carSearch" type="text" placeholder="メーカー・モデルを検索...">
+      </div>
+      <div class="cls-btns">
+        <button class="cb on" data-c="ALL">ALL</button>
+        <button class="cb" data-c="D">D</button>
+        <button class="cb" data-c="C">C</button>
+        <button class="cb" data-c="B">B</button>
+        <button class="cb" data-c="A">A</button>
+        <button class="cb" data-c="S1">S1</button>
+        <button class="cb" data-c="S2">S2</button>
+        <button class="cb" data-c="X">X</button>
+      </div>
+    </div>
+    <div class="car-list" id="carList"></div>
+    <div class="sel-car" id="selCarBox">
+      <div class="sel-car-name" id="selCarName"></div>
+      <div class="sel-car-sub">
+        <span id="selCarYear"></span>
+        <span class="badge" id="selCarCls"></span>
+        <span id="selCarPi"></span>
+      </div>
+    </div>
+
+    <div class="sec-hdr">⚙️ スペック入力 <span style="font-size:9px;color:var(--text3);font-weight:400;letter-spacing:0;text-transform:none;">（未入力はAI補完）</span></div>
+    <div class="spec-form">
+      <div class="frow">
+        <div class="fg">
+          <div class="flbl">出力 <span class="opt">任意</span></div>
+          <input class="si" id="power" type="number" placeholder="kW">
+        </div>
+        <div class="fg">
+          <div class="flbl">トルク <span class="opt">任意</span></div>
+          <input class="si" id="torque" type="number" placeholder="Nm">
+        </div>
+      </div>
+      <div class="frow">
+        <div class="fg">
+          <div class="flbl">車重 <span class="opt">任意</span></div>
+          <input class="si" id="weight" type="number" placeholder="kg">
+        </div>
+        <div class="fg">
+          <div class="flbl">フロント配分 <span class="opt">任意</span></div>
+          <input class="si" id="frontBias" type="number" placeholder="%" min="0" max="100">
+        </div>
+      </div>
+      <div class="frow">
+        <div class="fg">
+          <div class="flbl">タイヤ <span class="opt">任意</span></div>
+          <select class="si" id="tires">
+            <option value="">AI補完</option>
+            <option>ストリート</option><option>スポーツ</option>
+            <option>セミスリック</option><option>スリック</option>
+            <option>オフロード</option><option>ラリー</option><option>ドラッグ</option>
+          </select>
+        </div>
+        <div class="fg">
+          <div class="flbl">駆動系 <span class="opt">任意</span></div>
+          <select class="si" id="drivetrain">
+            <option value="">AI補完</option>
+            <option>FR</option><option>FF</option><option>MR</option>
+            <option>RR</option><option>AWD</option><option>4WD</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg">
+        <div class="flbl">用途 <span class="opt">任意</span></div>
+        <select class="si" id="purpose">
+          <option value="">AI補完</option>
+          <option>タイムアタック</option><option>ドリフト</option>
+          <option>ドラッグレース</option><option>ラリー</option>
+          <option>サーキット</option><option>ストリート</option><option>クロスカントリー</option>
+        </select>
+      </div>
+      <div class="frow">
+        <div class="fg">
+          <div class="flbl">ベストラップ <span class="opt">任意</span></div>
+          <input class="si" id="lapTime" type="text" placeholder="1:23.456">
+        </div>
+        <div class="fg">
+          <div class="flbl">セッション名 <span class="opt">任意</span></div>
+          <input class="si" id="sessionName" type="text" placeholder="富士テスト">
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-p" id="tuneBtn" disabled>🧠 AI チューニング提案</button>
+      <button class="btn btn-s" id="resetBtn">↺</button>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right">
+    <div class="output" id="outputArea">
+      <div class="empty" id="emptyState">
+        <div class="empty-icon">🏁</div>
+        <h3>チューニングを開始</h3>
+        <p>車両を選択してスペックを入力。<br>未入力の項目はAIが自動補完します。</p>
+      </div>
+      <div class="loading" id="loadingState">
+        <div class="spin"></div>
+        <div style="font-size:13px;">Claude AIが解析中...</div>
+        <div id="loadingCar" style="font-size:11px;color:var(--text3);"></div>
+      </div>
+      <div class="result" id="resultBlock">
+        <div class="res-hdr">
+          <div>
+            <h2 id="resName"></h2>
+            <p id="resMeta"></p>
+          </div>
+          <div class="res-btns">
+            <button class="btn btn-s" id="copyBtn" style="font-size:11px;padding:7px 11px;">📋 コピー</button>
+            <button class="btn btn-s" id="newTuneBtn" style="font-size:11px;padding:7px 11px;">🔄 再提案</button>
+          </div>
+        </div>
+        <div class="summary" id="resSummary"></div>
+        <div class="tgrid" id="tuneGrid"></div>
+        <!-- Feedback -->
+        <div class="fb-sec">
+          <div class="fb-ttl">↩ フィードバックで再チューニング</div>
+          <div class="fb-grid">
+            <div class="fg">
+              <div class="flbl">ハンドリング</div>
+              <select class="si" id="fbH">
+                <option value="">変更なし</option>
+                <option>アンダーステア気味</option><option>オーバーステア気味</option>
+                <option>ニュートラル（良好）</option><option>スティッフすぎる</option><option>ソフトすぎる</option>
+              </select>
+            </div>
+            <div class="fg">
+              <div class="flbl">ブレーキ</div>
+              <select class="si" id="fbB">
+                <option value="">変更なし</option>
+                <option>効きすぎる</option><option>効きが弱い</option>
+                <option>ブレーキ時不安定</option><option>良好</option>
+              </select>
+            </div>
+            <div class="fg">
+              <div class="flbl">速度特性</div>
+              <select class="si" id="fbS">
+                <option value="">変更なし</option>
+                <option>最高速が足りない</option><option>加速力が足りない</option>
+                <option>バランス良好</option><option>オーバーヒート傾向</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-p" id="retuneBtn" style="max-width:220px;font-size:11px;">↻ フィードバック再チューニング</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div class="hist">
+      <div class="hist-hdr">
+        <div class="hist-ttl">📚 チューニング履歴</div>
+        <button class="btn btn-s" id="clearHist" style="font-size:9px;padding:3px 7px;">クリア</button>
+      </div>
+      <div class="hist-list" id="histList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────
+let selCar = null, curTuning = null, clsFilter = 'ALL';
+let hist = JSON.parse(localStorage.getItem('fh6h') || '[]');
+
+// ─── CARS ────────────────────────────────────────────────
+const CARS = CAR_DATA.map(([id,make,model,year,cls,pi]) => ({id,make,model,year,cls,pi}));
+
+function filtered() {
+  const q = document.getElementById('carSearch').value.toLowerCase();
+  return CARS.filter(c => {
+    const mc = clsFilter === 'ALL' || c.cls === clsFilter;
+    const mq = !q || (c.make+' '+c.model).toLowerCase().includes(q);
+    return mc && mq;
+  });
+}
+
+function renderList() {
+  const el = document.getElementById('carList');
+  const cars = filtered().slice(0, 200);
+  if (!cars.length) { el.innerHTML = '<div class="no-res">該当車両なし</div>'; return; }
+  el.innerHTML = cars.map(c => `
+    <div class="ci${selCar?.id===c.id?' sel':''}" data-id="${c.id}">
+      <div class="ci-info">
+        <div class="ci-name">${c.make} ${c.model}</div>
+        <div class="ci-yr">${c.year}</div>
+      </div>
+      <span class="badge bd-${c.cls}">${c.cls}</span>
+      <span class="pi-lbl">${c.pi}</span>
+    </div>`).join('');
+  el.querySelectorAll('.ci').forEach(el =>
+    el.addEventListener('click', () => pickCar(CARS.find(c => c.id == el.dataset.id)))
+  );
+}
+
+function pickCar(car) {
+  selCar = car;
+  document.getElementById('selCarName').textContent = car.make + ' ' + car.model;
+  document.getElementById('selCarYear').textContent = car.year;
+  const cb = document.getElementById('selCarCls');
+  cb.textContent = car.cls; cb.className = 'badge bd-' + car.cls;
+  document.getElementById('selCarPi').textContent = 'PI ' + car.pi;
+  document.getElementById('selCarBox').classList.add('v');
+  document.getElementById('tuneBtn').disabled = false;
+  renderList();
+}
+
+document.getElementById('carSearch').addEventListener('input', renderList);
+document.querySelectorAll('.cb').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.cb').forEach(x => x.classList.remove('on'));
+  b.classList.add('on'); clsFilter = b.dataset.c; renderList();
+}));
+
+// ─── TUNE ────────────────────────────────────────────────
+function getSpecs() {
+  return {
+    power:      document.getElementById('power').value || null,
+    torque:     document.getElementById('torque').value || null,
+    weight:     document.getElementById('weight').value || null,
+    frontBias:  document.getElementById('frontBias').value || null,
+    tires:      document.getElementById('tires').value || null,
+    drivetrain: document.getElementById('drivetrain').value || null,
+    purpose:    document.getElementById('purpose').value || null,
+  };
+}
+
+async function doTune(feedback) {
+  if (!selCar) return;
+  document.getElementById('emptyState').classList.add('hide');
+  document.getElementById('resultBlock').classList.remove('v');
+  document.getElementById('loadingState').classList.add('v');
+  document.getElementById('loadingCar').textContent = selCar.make + ' ' + selCar.model + ' ' + selCar.year;
+  document.getElementById('tuneBtn').disabled = true;
+
+  try {
+    const body = { car: selCar, specs: getSpecs() };
+    if (feedback) body.feedback = feedback;
+    if (curTuning) body.resumeData = curTuning;
+
+    const r = await fetch('/api/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const d = await r.json();
+    if (!r.ok || !d.tuning) throw new Error(d.error || 'API error');
+    curTuning = d.tuning;
+    renderTuning(d.tuning);
+    saveHist(d.tuning);
+  } catch(e) {
+    document.getElementById('loadingState').classList.remove('v');
+    document.getElementById('emptyState').classList.remove('hide');
+    toast('❌ ' + e.message, '#ef4444');
+  } finally {
+    document.getElementById('tuneBtn').disabled = false;
+  }
+}
+
+document.getElementById('tuneBtn').addEventListener('click', () => doTune());
+document.getElementById('newTuneBtn').addEventListener('click', () => doTune());
+document.getElementById('retuneBtn').addEventListener('click', () => {
+  doTune({
+    handling: document.getElementById('fbH').value,
+    braking:  document.getElementById('fbB').value,
+    speed:    document.getElementById('fbS').value
+  });
+});
+document.getElementById('resetBtn').addEventListener('click', () => {
+  selCar = null; curTuning = null;
+  document.getElementById('selCarBox').classList.remove('v');
+  document.getElementById('resultBlock').classList.remove('v');
+  document.getElementById('loadingState').classList.remove('v');
+  document.getElementById('emptyState').classList.remove('hide');
+  document.getElementById('tuneBtn').disabled = true;
+  document.querySelectorAll('input.si').forEach(i => i.value = '');
+  document.querySelectorAll('select.si').forEach(s => s.selectedIndex = 0);
+  renderList();
+});
+
+// ─── RENDER TUNING ────────────────────────────────────────
+function bar(pct) {
+  const w = Math.min(100, Math.max(0, pct || 0));
+  return `<div class="pbw"><div class="pb" style="width:${w}%"></div></div>`;
+}
+
+function pr(label, val, unit, pct, note) {
+  const u = unit ? `<span class="pu"> ${unit}</span>` : '';
+  const p = pct != null ? `<span class="pct">${Math.round(pct)}%</span>` : '';
+  const b = pct != null ? bar(pct) : '';
+  const n = note ? `<div class="pn">${note}</div>` : '';
+  return `<div class="pr"><span class="pl">${label}</span><span class="pv">${val}${u}</span>${p}${b}</div>${n}`;
+}
+
+function card(ttl, ico, html, fw) {
+  return `<div class="tcard${fw?' fw':''}"><div class="chdr">${ico} ${ttl}</div><div class="cbdy">${html}</div></div>`;
+}
+
+function renderTuning(t) {
+  document.getElementById('loadingState').classList.remove('v');
+  document.getElementById('resultBlock').classList.add('v');
+  document.getElementById('resName').textContent = selCar.make + ' ' + selCar.model;
+  document.getElementById('resMeta').textContent =
+    selCar.year + ' · Class ' + selCar.cls + ' (PI ' + selCar.pi + ') · ' +
+    (document.getElementById('purpose').value || 'チューニング提案');
+  document.getElementById('resSummary').textContent = t.summary || '';
+
+  const g = document.getElementById('tuneGrid');
+  const arb = t.arb || {}, sp = t.springs || {}, dm = t.damping || {};
+  const al = t.alignment || {}, ae = t.aero || {}, br = t.brakes || {};
+  const df = t.diff || {}, gr = t.gears || {};
+
+  g.innerHTML = [
+    card('ARB','🔩',
+      pr('フロント', arb.front?.value??'-','mm',null,arb.front?.note)+
+      pr('リア',     arb.rear?.value??'-','mm',null,arb.rear?.note)),
+
+    card('スプリング','🌀',
+      pr('フロント', sp.front?.value??'-','kgf/mm',sp.front?.percent,sp.front?.note)+
+      pr('リア',     sp.rear?.value??'-','kgf/mm',sp.rear?.percent,sp.rear?.note)),
+
+    card('ダンピング','📉',
+      pr('フロントバンプ',    dm.frontBump?.value??'-','',dm.frontBump?.percent,dm.frontBump?.note)+
+      pr('リアバンプ',        dm.rearBump?.value??'-','',dm.rearBump?.percent,dm.rearBump?.note)+
+      pr('フロントリバウンド',dm.frontRebound?.value??'-','',dm.frontRebound?.percent,dm.frontRebound?.note)+
+      pr('リアリバウンド',    dm.rearRebound?.value??'-','',dm.rearRebound?.percent,dm.rearRebound?.note)),
+
+    card('アライメント','📐',
+      pr('フロントキャンバー',al.frontCamber?.value??'-','°',null,al.frontCamber?.note)+
+      pr('リアキャンバー',    al.rearCamber?.value??'-','°',null,al.rearCamber?.note)+
+      pr('フロントトー',      al.frontToe?.value??'-','°',null,al.frontToe?.note)+
+      pr('リアトー',          al.rearToe?.value??'-','°',null,al.rearToe?.note)+
+      pr('キャスター',        al.caster?.value??'-','°',null,al.caster?.note)),
+
+    card('エアロ','💨',
+      pr('フロントダウンフォース',ae.frontDownforce?.value??'-','kg',ae.frontDownforce?.percent,ae.frontDownforce?.note)+
+      pr('リアダウンフォース',    ae.rearDownforce?.value??'-','kg',ae.rearDownforce?.percent,ae.rearDownforce?.note)),
+
+    card('ブレーキ','🛑',
+      pr('バランス（前）',br.balance?.value??'-','%',null,br.balance?.note)+
+      pr('圧力',          br.pressure?.value??'-','%',br.pressure?.percent,br.pressure?.note)),
+
+    card('デファレンシャル','⚙️',
+      pr('フロント加速',     df.frontAccel?.value??'-','%',df.frontAccel?.value,df.frontAccel?.note)+
+      pr('フロント減速',     df.frontDecel?.value??'-','%',df.frontDecel?.value,df.frontDecel?.note)+
+      pr('リア加速',         df.rearAccel?.value??'-','%',df.rearAccel?.value,df.rearAccel?.note)+
+      pr('リア減速',         df.rearDecel?.value??'-','%',df.rearDecel?.value,df.rearDecel?.note)+
+      (df.centerBalance ? pr('センターバランス',df.centerBalance?.value??'-','%',df.centerBalance?.value,df.centerBalance?.note) : '')),
+
+    card('ギアレシオ','📊', (() => {
+      const ratios = gr.ratios || [];
+      const rows = ratios.map((r,i) => `<tr><td style="color:var(--text3)">${i+1}速</td><td style="font-weight:700">${typeof r==='number'?r.toFixed(3):r}</td></tr>`).join('');
+      return pr('ファイナルドライブ', gr.finalDrive?.value??'-','',null,gr.finalDrive?.note) +
+        (rows ? `<table class="gtbl"><tr><th>速</th><th>レシオ</th></tr>${rows}</table>` : '');
+    })(), true),
+  ].join('');
+}
+
+// ─── COPY ────────────────────────────────────────────────
+document.getElementById('copyBtn').addEventListener('click', () => {
+  if (!curTuning || !selCar) return;
+  const t = curTuning;
+  const lines = [
+    '═══════════════════════════════',
+    'FH6 チューニングシート',
+    '═══════════════════════════════',
+    `車両: ${selCar.make} ${selCar.model} ${selCar.year}`,
+    `クラス: ${selCar.cls}  PI: ${selCar.pi}`,
+    `用途: ${document.getElementById('purpose').value || '-'}`,
+    '',
+    '■ ARB',
+    `  フロント: ${t.arb?.front?.value??'-'} mm`,
+    `  リア: ${t.arb?.rear?.value??'-'} mm`,
+    '',
+    '■ スプリング',
+    `  フロント: ${t.springs?.front?.value??'-'} kgf/mm`,
+    `  リア: ${t.springs?.rear?.value??'-'} kgf/mm`,
+    '',
+    '■ ダンピング',
+    `  フロントバンプ/リバウンド: ${t.damping?.frontBump?.value??'-'} / ${t.damping?.frontRebound?.value??'-'}`,
+    `  リアバンプ/リバウンド: ${t.damping?.rearBump?.value??'-'} / ${t.damping?.rearRebound?.value??'-'}`,
+    '',
+    '■ アライメント',
+    `  キャンバー F/R: ${t.alignment?.frontCamber?.value??'-'}° / ${t.alignment?.rearCamber?.value??'-'}°`,
+    `  トー F/R: ${t.alignment?.frontToe?.value??'-'}° / ${t.alignment?.rearToe?.value??'-'}°`,
+    `  キャスター: ${t.alignment?.caster?.value??'-'}°`,
+    '',
+    '■ エアロ',
+    `  F/R: ${t.aero?.frontDownforce?.value??'-'} / ${t.aero?.rearDownforce?.value??'-'} kg`,
+    '',
+    '■ ブレーキ',
+    `  バランス: ${t.brakes?.balance?.value??'-'}%前  圧力: ${t.brakes?.pressure?.value??'-'}%`,
+    '',
+    '■ デフ（リア）',
+    `  加速: ${t.diff?.rearAccel?.value??'-'}%  減速: ${t.diff?.rearDecel?.value??'-'}%`,
+    '',
+    '■ ギア',
+    `  ファイナル: ${t.gears?.finalDrive?.value??'-'}`,
+    ...(t.gears?.ratios||[]).map((r,i) => `  ${i+1}速: ${typeof r==='number'?r.toFixed(3):r}`),
+    '',
+    '■ 概要',
+    t.summary || '-',
+    '═══════════════════════════════',
+    'FH6 Tuning Simulator (Claude AI)',
+  ];
+  navigator.clipboard.writeText(lines.join('\n')).then(() => toast('✓ コピーしました'));
+});
+
+// ─── HISTORY ─────────────────────────────────────────────
+function saveHist(tuning) {
+  const entry = {
+    id: Date.now(),
+    car: { ...selCar },
+    specs: getSpecs(),
+    lapTime: document.getElementById('lapTime').value,
+    sessionName: document.getElementById('sessionName').value,
+    tuning,
+    date: new Date().toLocaleDateString('ja-JP'),
+  };
+  hist.unshift(entry);
+  if (hist.length > 50) hist = hist.slice(0, 50);
+  localStorage.setItem('fh6h', JSON.stringify(hist));
+  renderHist();
+}
+
+function bestEntry() {
+  const w = hist.filter(e => e.lapTime);
+  if (!w.length) return null;
+  return w.reduce((b, e) => {
+    const parse = s => { const m = s.match(/(\d+):?([\d.]+)/); return m ? parseFloat(m[1])*60+parseFloat(m[2]) : 9999; };
+    return parse(e.lapTime) < parse(b.lapTime) ? e : b;
+  });
+}
+
+function renderHist() {
+  const el = document.getElementById('histList');
+  if (!hist.length) { el.innerHTML = '<div style="color:var(--text3);font-size:11px;align-self:center;">履歴なし</div>'; return; }
+  const best = bestEntry();
+  el.innerHTML = hist.map(e => {
+    const isBest = best && e.id === best.id;
+    return `<div class="hcard${isBest?' best':''}" data-id="${e.id}">
+      ${isBest?'<div class="best-ico">🏆</div>':''}
+      <div class="hc-car">${e.car.make} ${e.car.model}</div>
+      <div class="hc-dt">${e.date}${e.sessionName?' · '+e.sessionName:''}</div>
+      <div class="hc-pur">${e.specs?.purpose||'用途未設定'} <span class="badge bd-${e.car.cls}" style="font-size:8px;padding:1px 3px;">${e.car.cls}</span></div>
+      ${e.lapTime?`<div class="hc-lap">⏱ ${e.lapTime}</div>`:''}
+      <div class="hc-resume">再開 →</div>
+    </div>`;
+  }).join('');
+  el.querySelectorAll('.hcard').forEach(c =>
+    c.addEventListener('click', () => resumeSess(hist.find(e => e.id == c.dataset.id)))
+  );
+}
+
+function resumeSess(entry) {
+  if (!entry) return;
+  const car = CARS.find(c => c.id === entry.car.id) || entry.car;
+  pickCar(car);
+  const s = entry.specs || {};
+  document.getElementById('power').value = s.power || '';
+  document.getElementById('torque').value = s.torque || '';
+  document.getElementById('weight').value = s.weight || '';
+  document.getElementById('frontBias').value = s.frontBias || '';
+  document.getElementById('tires').value = s.tires || '';
+  document.getElementById('drivetrain').value = s.drivetrain || '';
+  document.getElementById('purpose').value = s.purpose || '';
+  document.getElementById('lapTime').value = entry.lapTime || '';
+  document.getElementById('sessionName').value = entry.sessionName || '';
+  if (entry.tuning) { curTuning = entry.tuning; renderTuning(entry.tuning); }
+  toast('↩ セッション再開');
+}
+
+document.getElementById('clearHist').addEventListener('click', () => {
+  if (!confirm('履歴をすべて削除しますか？')) return;
+  hist = []; localStorage.removeItem('fh6h'); renderHist();
+});
+
+// ─── TOAST ───────────────────────────────────────────────
+function toast(msg, bg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  if (bg) el.style.background = bg;
+  else el.style.background = '#22c55e';
+  el.classList.add('v');
+  setTimeout(() => el.classList.remove('v'), 2600);
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+renderList();
+renderHist();
+</script>
+</body>
+</html>
