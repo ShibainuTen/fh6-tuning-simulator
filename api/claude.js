@@ -17,7 +17,7 @@ module.exports = async function handler(req, res) {
   }
   body = body || {};
 
-  const { car, specs, feedback, resumeData } = body;
+  const { car, specs, feedback, resumeData, driverProfile } = body;
   if (!car) return res.status(400).json({ error: 'car data required' });
 
   const specLines = [
@@ -30,6 +30,14 @@ module.exports = async function handler(req, res) {
     specs?.purpose    ? `用途: ${specs.purpose}`             : '用途: 不明（AI推定）',
     specs?.gearCount  ? `ギア数: ${specs.gearCount}速`       : 'ギア数: 不明（AI推定）',
   ].join('\n');
+
+  const profileSection = driverProfile
+    ? `\n【ドライバープロフィール】
+グリップ/ドリフト: ${driverProfile.grip <= 33 ? 'グリップ重視' : driverProfile.grip >= 67 ? 'ドリフト重視' : 'バランス'}（${driverProfile.grip}/100）
+安定/クイック: ${driverProfile.stab <= 33 ? '安定志向' : driverProfile.stab >= 67 ? 'クイック志向' : 'バランス'}（${driverProfile.stab}/100）
+ブレーキ: ${driverProfile.brake <= 33 ? '強め' : driverProfile.brake >= 67 ? '柔らか' : 'バランス'}（${driverProfile.brake}/100）
+→ ARB・スプリング・ダンピング・ブレーキ・アライメントにこのプロファイルを反映してください。`
+    : '';
 
   const feedbackSection = feedback
     ? `\n【前回セッティングへのフィードバック】\nハンドリング: ${feedback.handling || '-'}\nブレーキ: ${feedback.braking || '-'}\n速度特性: ${feedback.speed || '-'}`
@@ -51,9 +59,11 @@ module.exports = async function handler(req, res) {
 
 【スペック】
 ${specLines}
+${profileSection}
 ${feedbackSection}
 ${resumeSection}
 
+タイヤ種別が指定されている場合は、その特性（グリップ・コンプライアンス・荷重感度）に合わせて空気圧範囲とサスペンション硬さを最適化してください。
 以下のJSON形式のみで回答してください。余分なテキスト・コードブロック記号は不要です：
 
 {

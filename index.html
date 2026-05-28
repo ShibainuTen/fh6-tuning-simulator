@@ -159,7 +159,7 @@
     .tcard{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;transition:border-color .2s;}
     .tcard:hover{border-color:rgba(239,68,68,.35);}
     .tcard.fw{grid-column:span 2;}
-    .chdr{padding:7px 11px;background:rgba(255,255,255,.025);border-bottom:1px solid var(--border);font-size:9px;font-weight:700;color:var(--accent);letter-spacing:2px;text-transform:uppercase;}
+    .chdr{padding:7px 11px;background:rgba(255,255,255,.025);border-bottom:1px solid var(--border);font-size:9px;font-weight:700;color:var(--accent);letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;}
     .cbdy{padding:9px 11px;}
     /* PARAM */
     .pr{display:flex;align-items:center;gap:6px;padding:3px 0;}
@@ -207,6 +207,33 @@
     }
     .toast.v{transform:translateY(0);opacity:1;}
     .no-res{padding:14px;text-align:center;color:var(--text3);font-size:11px;}
+    /* DRIVER PROFILE */
+    .dp-hdr{cursor:pointer;user-select:none;}
+    .dp-hdr:hover{background:rgba(239,68,68,.09);}
+    .dp-body{padding:8px 14px 10px;border-bottom:1px solid var(--border);flex-shrink:0;display:none;}
+    .dp-body.v{display:block;}
+    .dp-slider{margin-bottom:7px;}
+    .dp-slider:last-child{margin-bottom:0;}
+    .dp-labels{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;}
+    .dp-lft,.dp-rgt{font-size:9px;color:var(--text3);}
+    .dp-num{font-size:9px;color:var(--accent);font-weight:700;min-width:26px;text-align:center;}
+    .dp-range{width:100%;-webkit-appearance:none;appearance:none;height:3px;border-radius:2px;background:var(--surface2);outline:none;cursor:pointer;}
+    .dp-range::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 0 5px rgba(239,68,68,.6);}
+    .dp-range::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:var(--accent);cursor:pointer;border:none;}
+    /* NOTES */
+    .notes-box{margin:0 14px 6px;flex-shrink:0;display:none;}
+    .notes-box.v{display:block;}
+    .notes-hdr{font-size:9px;font-weight:700;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;}
+    .notes-clear{background:none;border:none;color:var(--text3);cursor:pointer;font-size:10px;padding:0;line-height:1;}
+    .notes-clear:hover{color:var(--accent);}
+    .notes-ta{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:11px;padding:6px 8px;resize:none;outline:none;line-height:1.5;font-family:inherit;}
+    .notes-ta:focus{border-color:var(--accent);}
+    .notes-hist-hdr{font-size:8px;color:var(--text3);margin-top:5px;margin-bottom:2px;letter-spacing:.5px;text-transform:uppercase;}
+    .notes-hist{font-size:9px;color:var(--text3);max-height:42px;overflow-y:auto;line-height:1.5;}
+    .notes-hist div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    /* CARD COPY */
+    .card-cp{background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px;padding:1px 3px;opacity:.4;transition:opacity .15s;flex-shrink:0;margin-left:auto;}
+    .card-cp:hover{opacity:1;}
     @media(max-width:860px){
       .main{grid-template-columns:1fr;grid-template-rows:auto 1fr;height:auto;}
       .left{max-height:55vh;}
@@ -236,6 +263,21 @@
 <div class="main">
   <!-- LEFT PANEL -->
   <div class="left">
+    <div class="sec-hdr dp-hdr" id="dpHdr" onclick="toggleDP()">👤 ドライバープロフィール <span id="dpToggle" style="float:right;font-weight:400;font-size:9px;letter-spacing:0;color:var(--text3);">▼</span></div>
+    <div class="dp-body" id="dpBody">
+      <div class="dp-slider">
+        <div class="dp-labels"><span class="dp-lft">グリップ重視</span><span class="dp-num" id="dpGripVal">30</span><span class="dp-rgt">ドリフト重視</span></div>
+        <input type="range" class="dp-range" id="dpGrip" min="0" max="100" value="30">
+      </div>
+      <div class="dp-slider">
+        <div class="dp-labels"><span class="dp-lft">安定志向</span><span class="dp-num" id="dpStabVal">40</span><span class="dp-rgt">クイック</span></div>
+        <input type="range" class="dp-range" id="dpStab" min="0" max="100" value="40">
+      </div>
+      <div class="dp-slider">
+        <div class="dp-labels"><span class="dp-lft">ブレーキ強め</span><span class="dp-num" id="dpBrakeVal">50</span><span class="dp-rgt">ブレーキ柔らか</span></div>
+        <input type="range" class="dp-range" id="dpBrake" min="0" max="100" value="50">
+      </div>
+    </div>
     <div class="sec-hdr">🏎 車両選択</div>
     <div class="car-search">
       <div class="search-row">
@@ -261,6 +303,16 @@
         <span class="badge" id="selCarCls"></span>
         <span id="selCarPi"></span>
       </div>
+    </div>
+
+    <div class="notes-box" id="notesBox">
+      <div class="notes-hdr">
+        📝 チューニングノート
+        <button class="notes-clear" id="notesClearBtn" title="ノートをクリア">✕</button>
+      </div>
+      <textarea class="notes-ta" id="notesTA" rows="3" placeholder="メモ・セッティング覚書..."></textarea>
+      <div class="notes-hist-hdr" id="notesHistHdr" style="display:none">履歴</div>
+      <div class="notes-hist" id="notesHist"></div>
     </div>
 
     <div class="sec-hdr">⚙️ スペック入力 <span style="font-size:9px;color:var(--text3);font-weight:400;letter-spacing:0;text-transform:none;">（未入力はAI補完）</span></div>
@@ -290,9 +342,8 @@
           <div class="flbl">タイヤ <span class="opt">任意</span></div>
           <select class="si" id="tires">
             <option value="">AI補完</option>
-            <option>ストリート</option><option>スポーツ</option>
-            <option>セミスリック</option><option>スリック</option>
-            <option>オフロード</option><option>ラリー</option><option>ドラッグ</option>
+            <option>スポーツ</option><option>セミスリック</option>
+            <option>スリック</option><option>オフロード</option><option>ラリー</option>
           </select>
         </div>
         <div class="fg">
@@ -423,6 +474,47 @@
 // ─── STATE ───────────────────────────────────────────────
 let selCar = null, curTuning = null, clsFilter = 'ALL';
 let hist = JSON.parse(localStorage.getItem('fh6h') || '[]');
+let driverProfile = JSON.parse(localStorage.getItem('fh6dp') || 'null') || { grip: 30, stab: 40, brake: 50 };
+let carNotes = JSON.parse(localStorage.getItem('fh6notes') || '{}');
+
+// ─── DRIVER PROFILE ──────────────────────────────────────
+function toggleDP() {
+  const body = document.getElementById('dpBody');
+  const tog  = document.getElementById('dpToggle');
+  const open = body.classList.toggle('v');
+  tog.textContent = open ? '▲' : '▼';
+}
+
+// ─── NOTES ───────────────────────────────────────────────
+function loadNotes(carId) {
+  const d = carNotes[String(carId)] || { text: '', history: [] };
+  document.getElementById('notesTA').value = d.text;
+  renderNotesHist(d.history);
+  document.getElementById('notesBox').classList.add('v');
+}
+
+function renderNotesHist(history) {
+  const el = document.getElementById('notesHist');
+  const hdr = document.getElementById('notesHistHdr');
+  if (!history || !history.length) { el.innerHTML = ''; hdr.style.display = 'none'; return; }
+  hdr.style.display = 'block';
+  el.innerHTML = history.slice(-8).reverse().map(h => `<div>${h}</div>`).join('');
+}
+
+function saveNotesText(carId) {
+  if (!carNotes[String(carId)]) carNotes[String(carId)] = { text: '', history: [] };
+  carNotes[String(carId)].text = document.getElementById('notesTA').value;
+  localStorage.setItem('fh6notes', JSON.stringify(carNotes));
+}
+
+function appendNoteHistory(carId, entry) {
+  if (!carNotes[String(carId)]) carNotes[String(carId)] = { text: '', history: [] };
+  const h = carNotes[String(carId)].history;
+  h.push(entry);
+  if (h.length > 20) carNotes[String(carId)].history = h.slice(-20);
+  localStorage.setItem('fh6notes', JSON.stringify(carNotes));
+  renderNotesHist(carNotes[String(carId)].history);
+}
 
 // ─── CARS ────────────────────────────────────────────────
 const CARS = CAR_DATA.map((c, i) => ({id: i, make: c.make, model: c.model, year: c.year, cls: c.cls}));
@@ -462,6 +554,7 @@ function pickCar(car) {
   document.getElementById('selCarPi').textContent = car.year + '年式';
   document.getElementById('selCarBox').classList.add('v');
   document.getElementById('tuneBtn').disabled = false;
+  loadNotes(car.id);
   renderList();
 }
 
@@ -494,7 +587,7 @@ async function doTune(feedback) {
   document.getElementById('tuneBtn').disabled = true;
 
   try {
-    const body = { car: selCar, specs: getSpecs() };
+    const body = { car: selCar, specs: getSpecs(), driverProfile };
     if (feedback) body.feedback = feedback;
     if (curTuning) body.resumeData = curTuning;
 
@@ -536,6 +629,7 @@ document.getElementById('resetBtn').addEventListener('click', () => {
   document.getElementById('tuneBtn').disabled = true;
   document.querySelectorAll('input.si').forEach(i => i.value = '');
   document.querySelectorAll('select.si').forEach(s => s.selectedIndex = 0);
+  document.getElementById('notesBox').classList.remove('v');
   renderList();
 });
 
@@ -553,8 +647,9 @@ function pr(label, val, unit, pct, note) {
   return `<div class="pr"><span class="pl">${label}</span><span class="pv">${val}${u}</span>${p}${b}</div>${n}`;
 }
 
-function card(ttl, ico, html, fw) {
-  return `<div class="tcard${fw?' fw':''}"><div class="chdr">${ico} ${ttl}</div><div class="cbdy">${html}</div></div>`;
+function card(ttl, ico, html, fw, cp) {
+  const cpBtn = cp ? `<button class="card-cp" data-cp="${encodeURIComponent(cp)}" title="コピー">📋</button>` : '';
+  return `<div class="tcard${fw?' fw':''}"><div class="chdr"><span>${ico} ${ttl}</span>${cpBtn}</div><div class="cbdy">${html}</div></div>`;
 }
 
 function renderTuning(t, model) {
@@ -574,56 +669,81 @@ function renderTuning(t, model) {
   const al = t.alignment || {}, ae = t.aero || {}, br = t.brakes || {};
   const df = t.diff || {}, gr = t.gears || {};
 
+  const cp_tire = `■ タイヤ空気圧\n  F: ${tp.front?.value??'-'} Bar\n  R: ${tp.rear?.value??'-'} Bar`;
+  const cp_arb  = `■ スタビライザー（ARB）\n  F: ${arb.front?.value??'-'}\n  R: ${arb.rear?.value??'-'}`;
+  const cp_spr  = `■ スプリング・車高\n  車高 F/R: ${sp.rideHeightFront?.value??'-'} / ${sp.rideHeightRear?.value??'-'} cm\n  スプリング F/R: ${sp.front?.value??'-'} / ${sp.rear?.value??'-'} kgf/mm`;
+  const cp_dmp  = `■ ダンピング\n  バンプ F/R: ${dm.frontBump?.value??'-'} / ${dm.rearBump?.value??'-'}\n  リバウンド F/R: ${dm.frontRebound?.value??'-'} / ${dm.rearRebound?.value??'-'}`;
+  const cp_aln  = `■ アライメント\n  キャンバー F/R: ${al.frontCamber?.value??'-'}° / ${al.rearCamber?.value??'-'}°\n  トー F/R: ${al.frontToe?.value??'-'}° / ${al.rearToe?.value??'-'}°\n  キャスター: ${al.caster?.value??'-'}°`;
+  const cp_aero = `■ エアロ\n  F: ${ae.frontDownforce?.value??'-'} kg  R: ${ae.rearDownforce?.value??'-'} kg`;
+  const cp_brk  = `■ ブレーキ\n  バランス: ${br.balance?.value??'-'}%前  圧力: ${br.pressure?.value??'-'}%`;
+  const cp_diff = `■ デフ\n  F加速/減速: ${df.frontAccel?.value??'-'} / ${df.frontDecel?.value??'-'}\n  R加速/減速: ${df.rearAccel?.value??'-'} / ${df.rearDecel?.value??'-'}`;
+  const cp_gear = `■ ギア\n  ファイナル: ${gr.finalDrive?.value??'-'}\n${(gr.ratios||[]).map((r,i)=>`  ${i+1}速: ${typeof r==='number'?r.toFixed(3):r}`).join('\n')}`;
+
   g.innerHTML = [
     card('タイヤ空気圧','🫧',
       pr('フロント', tp.front?.value??'-','Bar',tp.front?.percent,tp.front?.note)+
-      pr('リア',     tp.rear?.value??'-','Bar',tp.rear?.percent,tp.rear?.note)),
+      pr('リア',     tp.rear?.value??'-','Bar',tp.rear?.percent,tp.rear?.note),
+      false, cp_tire),
 
     card('スタビライザー（ARB）','🔩',
       pr('フロント', arb.front?.value??'-','',null,arb.front?.note)+
-      pr('リア',     arb.rear?.value??'-','',null,arb.rear?.note)),
+      pr('リア',     arb.rear?.value??'-','',null,arb.rear?.note),
+      false, cp_arb),
 
     card('スプリング・車高','🌀',
       pr('車高フロント',  sp.rideHeightFront?.value??'-','cm',null,sp.rideHeightFront?.note)+
       pr('車高リア',      sp.rideHeightRear?.value??'-','cm',null,sp.rideHeightRear?.note)+
       pr('スプリングF',   sp.front?.value??'-','kgf/mm',sp.front?.percent,sp.front?.note)+
-      pr('スプリングR',   sp.rear?.value??'-','kgf/mm',sp.rear?.percent,sp.rear?.note)),
+      pr('スプリングR',   sp.rear?.value??'-','kgf/mm',sp.rear?.percent,sp.rear?.note),
+      false, cp_spr),
 
     card('ダンピング','📉',
       pr('フロントバンプ',    dm.frontBump?.value??'-','',dm.frontBump?.percent,dm.frontBump?.note)+
       pr('リアバンプ',        dm.rearBump?.value??'-','',dm.rearBump?.percent,dm.rearBump?.note)+
       pr('フロントリバウンド',dm.frontRebound?.value??'-','',dm.frontRebound?.percent,dm.frontRebound?.note)+
-      pr('リアリバウンド',    dm.rearRebound?.value??'-','',dm.rearRebound?.percent,dm.rearRebound?.note)),
+      pr('リアリバウンド',    dm.rearRebound?.value??'-','',dm.rearRebound?.percent,dm.rearRebound?.note),
+      false, cp_dmp),
 
     card('アライメント','📐',
       pr('フロントキャンバー',al.frontCamber?.value??'-','°',null,al.frontCamber?.note)+
       pr('リアキャンバー',    al.rearCamber?.value??'-','°',null,al.rearCamber?.note)+
       pr('フロントトー',      al.frontToe?.value??'-','°',null,al.frontToe?.note)+
       pr('リアトー',          al.rearToe?.value??'-','°',null,al.rearToe?.note)+
-      pr('キャスター',        al.caster?.value??'-','°',null,al.caster?.note)),
+      pr('キャスター',        al.caster?.value??'-','°',null,al.caster?.note),
+      false, cp_aln),
 
     card('エアロ','💨',
       pr('フロントダウンフォース',ae.frontDownforce?.value??'-','kg',ae.frontDownforce?.percent,ae.frontDownforce?.note)+
-      pr('リアダウンフォース',    ae.rearDownforce?.value??'-','kg',ae.rearDownforce?.percent,ae.rearDownforce?.note)),
+      pr('リアダウンフォース',    ae.rearDownforce?.value??'-','kg',ae.rearDownforce?.percent,ae.rearDownforce?.note),
+      false, cp_aero),
 
     card('ブレーキ','🛑',
       pr('バランス（前）',br.balance?.value??'-','%',null,br.balance?.note)+
-      pr('圧力',          br.pressure?.value??'-','%',br.pressure?.percent,br.pressure?.note)),
+      pr('圧力',          br.pressure?.value??'-','%',br.pressure?.percent,br.pressure?.note),
+      false, cp_brk),
 
     card('デファレンシャル','⚙️',
       pr('フロント加速',     df.frontAccel?.value??'-','%',df.frontAccel?.value,df.frontAccel?.note)+
       pr('フロント減速',     df.frontDecel?.value??'-','%',df.frontDecel?.value,df.frontDecel?.note)+
       pr('リア加速',         df.rearAccel?.value??'-','%',df.rearAccel?.value,df.rearAccel?.note)+
       pr('リア減速',         df.rearDecel?.value??'-','%',df.rearDecel?.value,df.rearDecel?.note)+
-      (df.centerBalance ? pr('センターバランス',df.centerBalance?.value??'-','%',df.centerBalance?.value,df.centerBalance?.note) : '')),
+      (df.centerBalance ? pr('センターバランス',df.centerBalance?.value??'-','%',df.centerBalance?.value,df.centerBalance?.note) : ''),
+      false, cp_diff),
 
     card('ギアレシオ','📊', (() => {
       const ratios = gr.ratios || [];
       const rows = ratios.map((r,i) => `<tr><td style="color:var(--text3)">${i+1}速</td><td style="font-weight:700">${typeof r==='number'?r.toFixed(3):r}</td></tr>`).join('');
       return pr('ファイナルドライブ', gr.finalDrive?.value??'-','',null,gr.finalDrive?.note) +
         (rows ? `<table class="gtbl"><tr><th>速</th><th>レシオ</th></tr>${rows}</table>` : '');
-    })(), true),
+    })(), true, cp_gear),
   ].join('');
+
+  g.querySelectorAll('.card-cp').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      navigator.clipboard.writeText(decodeURIComponent(btn.dataset.cp)).then(() => toast('✓ コピーしました'));
+    });
+  });
 }
 
 // ─── COPY ────────────────────────────────────────────────
@@ -695,6 +815,11 @@ function saveHist(tuning) {
   if (hist.length > 50) hist = hist.slice(0, 50);
   localStorage.setItem('fh6h', JSON.stringify(hist));
   renderHist();
+  const lap  = document.getElementById('lapTime').value;
+  const sess = document.getElementById('sessionName').value;
+  const pur  = document.getElementById('purpose').value;
+  const histLine = `${entry.date}${sess?' ['+sess+']':''} ${pur||'チューニング'}${lap?' ⏱'+lap:''}`;
+  appendNoteHistory(selCar.id, histLine);
 }
 
 function bestEntry() {
@@ -761,6 +886,28 @@ function toast(msg, bg) {
 }
 
 // ─── INIT ─────────────────────────────────────────────────
+// notes listeners
+document.getElementById('notesTA').addEventListener('input', () => {
+  if (selCar) saveNotesText(selCar.id);
+});
+document.getElementById('notesClearBtn').addEventListener('click', () => {
+  if (!selCar) return;
+  document.getElementById('notesTA').value = '';
+  saveNotesText(selCar.id);
+});
+
+// driver profile init
+[['Grip','grip'],['Stab','stab'],['Brake','brake']].forEach(([k, key]) => {
+  const el = document.getElementById('dp'+k);
+  el.value = driverProfile[key];
+  document.getElementById('dp'+k+'Val').textContent = driverProfile[key];
+  el.addEventListener('input', () => {
+    driverProfile[key] = parseInt(el.value);
+    document.getElementById('dp'+k+'Val').textContent = driverProfile[key];
+    localStorage.setItem('fh6dp', JSON.stringify(driverProfile));
+  });
+});
+
 renderList();
 renderHist();
 </script>
