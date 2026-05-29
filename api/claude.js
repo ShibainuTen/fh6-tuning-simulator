@@ -1,5 +1,5 @@
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', 'https://fh6-tuning-simulator.vercel.app');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
@@ -20,6 +20,14 @@ module.exports = async function handler(req, res) {
   const { car, specs, feedback, resumeData, driverProfile } = body;
   if (!car) return res.status(400).json({ error: 'car data required' });
 
+  const strLimit = (val, max) => typeof val === 'string' && val.length > max;
+  if (
+    strLimit(car.make, 100) || strLimit(car.model, 100) || strLimit(car.year, 10) ||
+    strLimit(feedback?.handling, 500) || strLimit(feedback?.braking, 500) || strLimit(feedback?.speed, 500) || strLimit(feedback?.note, 500)
+  ) {
+    return res.status(400).json({ error: 'Input value too long' });
+  }
+
   const specLines = [
     specs?.power      ? `出力: ${specs.power} kW`           : '出力: 不明（AI推定）',
     specs?.torque     ? `トルク: ${specs.torque} Nm`         : 'トルク: 不明（AI推定）',
@@ -27,8 +35,11 @@ module.exports = async function handler(req, res) {
     specs?.frontBias  ? `フロント配分: ${specs.frontBias}%`  : 'フロント配分: 不明（AI推定）',
     specs?.tires      ? `タイヤ: ${specs.tires}`             : 'タイヤ: 不明（AI推定）',
     specs?.drivetrain ? `駆動系: ${specs.drivetrain}`        : '駆動系: 不明（AI推定）',
-    specs?.purpose    ? `用途: ${specs.purpose}`             : '用途: 不明（AI推定）',
-    specs?.gearCount  ? `ギア数: ${specs.gearCount}速`       : 'ギア数: 不明（AI推定）',
+    specs?.brakeType  ? `ブレーキ: ${specs.brakeType}`          : 'ブレーキ: 不明（AI推定）',
+    specs?.diffType   ? `デフ: ${specs.diffType}`               : 'デフ: 不明（AI推定）',
+    specs?.purpose    ? `用途: ${specs.purpose}`               : '用途: 不明（AI推定）',
+    specs?.courseType ? `コース種別: ${specs.courseType}`      : 'コース種別: 不明（AI推定）',
+    specs?.gearCount  ? `ギア数: ${specs.gearCount}速`         : 'ギア数: 不明（AI推定）',
   ].join('\n');
 
   const profileSection = driverProfile
@@ -40,7 +51,7 @@ module.exports = async function handler(req, res) {
     : '';
 
   const feedbackSection = feedback
-    ? `\n【前回セッティングへのフィードバック】\nハンドリング: ${feedback.handling || '-'}\nブレーキ: ${feedback.braking || '-'}\n速度特性: ${feedback.speed || '-'}`
+    ? `\n【前回セッティングへのフィードバック】\nハンドリング: ${feedback.handling || '-'}\nブレーキ: ${feedback.braking || '-'}\n速度特性: ${feedback.speed || '-'}${feedback.note ? `\n自由記述: ${feedback.note}` : ''}`
     : '';
 
   const resumeSection = resumeData
@@ -113,7 +124,8 @@ ${resumeSection}
     "finalDrive": { "value": <比>, "note": "<説明>" },
     "ratios": [<指定ギア数分の数値配列。ギア数未指定なら車両クラスに適した段数で>]
   },
-  "summary": "<全体的なセッティング方針（日本語200字程度）>"
+  "summary": "<全体的なセッティング方針（日本語200字程度）>",
+  "partsRecommendation": "<タイヤ・エンジン・サスペンション等のパーツ変更提案（日本語150字程度。変更が不要であれば省略可）>"
 }`;
 
   // ── Claude 試行 ──────────────────────────────────────────
