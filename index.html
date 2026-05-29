@@ -7,24 +7,26 @@
   <script src="cars-data.js"></script>
   <style>
     :root {
-      --bg:#0a0b14;--surface:#111827;--surface2:#1f2937;--border:#374151;
-      --accent:#ef4444;--accent2:#f97316;--text:#f9fafb;--text2:#9ca3af;--text3:#6b7280;
+      --bg:transparent;--surface:rgba(12,15,26,0.82);--surface2:rgba(22,28,44,0.88);--border:rgba(255,255,255,0.11);
+      --accent:#ef4444;--accent2:#f97316;--text:#f0f2f8;--text2:#a8b4cc;--text3:#6a7890;
       --D:#9ca3af;--C:#22c55e;--B:#3b82f6;--A:#a855f7;--S1:#eab308;--S2:#f97316;--X:#ef4444;--R:#e879f9;
       --r:8px;
     }
     *{box-sizing:border-box;margin:0;padding:0;}
     body{
       font-family:'Segoe UI',system-ui,sans-serif;
-      background:var(--bg);
-      background-image:
-        repeating-linear-gradient(-60deg,transparent,transparent 40px,rgba(239,68,68,.018) 40px,rgba(239,68,68,.018) 80px),
-        radial-gradient(ellipse at 15% 50%,rgba(239,68,68,.06) 0%,transparent 55%),
-        radial-gradient(ellipse at 85% 10%,rgba(249,115,22,.05) 0%,transparent 50%);
+      background:url('/bg.jpg') center/cover fixed;
       color:var(--text);min-height:100vh;overflow-x:hidden;
     }
+    body::before{
+      content:'';position:fixed;inset:0;
+      background:rgba(6,8,18,0.55);
+      z-index:0;pointer-events:none;
+    }
+    header,.main{position:relative;z-index:1;}
     /* HEADER */
     header{
-      background:linear-gradient(135deg,#1a0000 0%,#0a0b14 50%,#000a1a 100%);
+      background:rgba(10,12,22,0.75);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
       border-bottom:2px solid var(--accent);padding:0 24px;height:60px;
       display:flex;align-items:center;justify-content:space-between;
       position:sticky;top:0;z-index:100;box-shadow:0 4px 24px rgba(239,68,68,.2);
@@ -44,7 +46,7 @@
     /* LAYOUT */
     .main{display:grid;grid-template-columns:400px 1fr;height:calc(100vh - 60px);overflow:hidden;}
     /* LEFT */
-    .left{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+    .left{background:var(--surface);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
     .sec-hdr{
       padding:9px 14px;font-size:10px;font-weight:700;letter-spacing:2px;
       text-transform:uppercase;color:var(--accent);background:rgba(239,68,68,.05);
@@ -80,7 +82,7 @@
     .car-list::-webkit-scrollbar{width:3px;}
     .car-list::-webkit-scrollbar-thumb{background:var(--accent);}
     .ci{
-      padding:7px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.03);
+      padding:7px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.05);
       display:flex;align-items:center;gap:7px;transition:background .12s;font-size:12px;
     }
     .ci:hover{background:rgba(239,68,68,.07);}
@@ -129,7 +131,7 @@
     .btn-s:hover{background:var(--border);color:var(--text);}
     /* RIGHT */
     .right{display:grid;grid-template-rows:1fr 200px;overflow:hidden;}
-    .output{overflow-y:auto;padding:18px 20px;}
+    .output{overflow-y:auto;padding:18px 20px;background:rgba(8,10,20,0.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
     .output::-webkit-scrollbar{width:5px;}
     .output::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
     /* EMPTY */
@@ -156,14 +158,14 @@
     }
     /* GRID */
     .tgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
-    .tcard{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;transition:border-color .2s;}
+    .tcard{background:var(--surface);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:6px;overflow:hidden;transition:border-color .2s;}
     .tcard:hover{border-color:rgba(239,68,68,.35);}
     .tcard.fw{grid-column:span 2;}
-    .chdr{padding:7px 11px;background:rgba(255,255,255,.025);border-bottom:1px solid var(--border);font-size:9px;font-weight:700;color:var(--accent);letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;}
+    .chdr{padding:7px 11px;background:rgba(255,255,255,.04);border-bottom:1px solid var(--border);font-size:9px;font-weight:700;color:var(--accent);letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;}
     .cbdy{padding:9px 11px;}
     /* PARAM */
     .pr{display:flex;align-items:center;gap:6px;padding:3px 0;}
-    .pr+.pr{border-top:1px solid rgba(255,255,255,.04);}
+    .pr+.pr{border-top:1px solid rgba(255,255,255,.07);}
     .pl{font-size:10px;color:var(--text3);width:105px;flex-shrink:0;}
     .pv{font-size:13px;font-weight:700;color:var(--text);flex-shrink:0;min-width:44px;}
     .pu{font-size:9px;color:var(--text3);font-weight:400;}
@@ -174,13 +176,13 @@
     /* GEAR TABLE */
     .gtbl{width:100%;border-collapse:collapse;font-size:11px;margin-top:5px;}
     .gtbl th{color:var(--text3);font-size:9px;text-transform:uppercase;letter-spacing:1px;padding:3px 8px;text-align:center;border-bottom:1px solid var(--border);}
-    .gtbl td{padding:3px 8px;text-align:center;color:var(--text);border-bottom:1px solid rgba(255,255,255,.04);}
+    .gtbl td{padding:3px 8px;text-align:center;color:var(--text);border-bottom:1px solid rgba(255,255,255,.06);}
     /* FEEDBACK */
     .fb-sec{background:var(--surface);border:1px solid var(--border);border-top:3px solid #3b82f6;border-radius:6px;padding:14px;margin-bottom:10px;}
     .fb-ttl{font-size:10px;font-weight:700;color:#3b82f6;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
     .fb-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;}
     /* HISTORY */
-    .hist{background:var(--surface);border-top:1px solid var(--border);padding:10px 18px;overflow:hidden;display:flex;flex-direction:column;}
+    .hist{background:rgba(10,12,22,0.78);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--border);padding:10px 18px;overflow:hidden;display:flex;flex-direction:column;}
     .hist-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-shrink:0;}
     .hist-ttl{font-size:10px;font-weight:700;color:var(--text2);letter-spacing:2px;text-transform:uppercase;}
     .hist-list{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;flex:1;}
@@ -234,6 +236,9 @@
     /* CARD COPY */
     .card-cp{background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px;padding:1px 3px;opacity:.4;transition:opacity .15s;flex-shrink:0;margin-left:auto;}
     .card-cp:hover{opacity:1;}
+    /* CHANGED HIGHLIGHT */
+    .pr.changed{background:rgba(34,197,94,.08);border-left:2px solid #22c55e;padding-left:4px;}
+    .pr.changed .pv{color:#22c55e;}
     @media(max-width:860px){
       .main{grid-template-columns:1fr;grid-template-rows:auto 1fr;height:auto;}
       .left{max-height:55vh;}
@@ -266,19 +271,20 @@
     <div class="sec-hdr dp-hdr" id="dpHdr" onclick="toggleDP()">👤 ドライバープロフィール <span id="dpToggle" style="float:right;font-weight:400;font-size:9px;letter-spacing:0;color:var(--text3);">▼</span></div>
     <div class="dp-body" id="dpBody">
       <div class="dp-slider">
-        <div class="dp-labels"><span class="dp-lft">グリップ重視</span><span class="dp-num" id="dpGripVal">30</span><span class="dp-rgt">ドリフト重視</span></div>
-        <input type="range" class="dp-range" id="dpGrip" min="0" max="100" value="30">
+        <div class="dp-labels"><span class="dp-lft">グリップ重視</span><span class="dp-num" id="dpGripVal">50</span><span class="dp-rgt">ドリフト重視</span></div>
+        <input type="range" class="dp-range" id="dpGrip" min="0" max="100" value="50">
       </div>
       <div class="dp-slider">
-        <div class="dp-labels"><span class="dp-lft">安定志向</span><span class="dp-num" id="dpStabVal">40</span><span class="dp-rgt">クイック</span></div>
-        <input type="range" class="dp-range" id="dpStab" min="0" max="100" value="40">
+        <div class="dp-labels"><span class="dp-lft">安定志向</span><span class="dp-num" id="dpStabVal">50</span><span class="dp-rgt">クイック</span></div>
+        <input type="range" class="dp-range" id="dpStab" min="0" max="100" value="50">
       </div>
       <div class="dp-slider">
         <div class="dp-labels"><span class="dp-lft">ブレーキ強め</span><span class="dp-num" id="dpBrakeVal">50</span><span class="dp-rgt">ブレーキ柔らか</span></div>
         <input type="range" class="dp-range" id="dpBrake" min="0" max="100" value="50">
       </div>
     </div>
-    <div class="sec-hdr">🏎 車両選択</div>
+    <div class="sec-hdr dp-hdr" id="carHdr" onclick="toggleCar()">🏎 車両選択 <span id="carToggle" style="float:right;font-weight:400;font-size:9px;letter-spacing:0;color:var(--text3);">▼</span></div>
+    <div id="carBody">
     <div class="car-search">
       <div class="search-row">
         <input class="si" id="carSearch" type="text" placeholder="メーカー・モデルを検索...">
@@ -305,6 +311,7 @@
       </div>
     </div>
 
+    </div><!-- /carBody -->
     <div class="notes-box" id="notesBox">
       <div class="notes-hdr">
         📝 チューニングノート
@@ -354,14 +361,50 @@
           </select>
         </div>
       </div>
-      <div class="fg">
-        <div class="flbl">用途 <span class="opt">任意</span></div>
-        <select class="si" id="purpose">
-          <option value="">AI補完</option>
-          <option>タイムアタック</option><option>ドリフト</option>
-          <option>ドラッグレース</option><option>ラリー</option>
-          <option>サーキット</option><option>ストリート</option><option>クロスカントリー</option>
-        </select>
+      <div class="frow">
+        <div class="fg">
+          <div class="flbl">ブレーキ <span class="opt">任意</span></div>
+          <select class="si" id="brakeType">
+            <option value="">AI補完</option>
+            <option>ストリート</option>
+            <option>スポーツ</option>
+            <option>レース</option>
+          </select>
+        </div>
+        <div class="fg">
+          <div class="flbl">デフ <span class="opt">任意</span></div>
+          <select class="si" id="diffType">
+            <option value="">AI補完</option>
+            <option>スタンダード</option>
+            <option>スポーツ</option>
+            <option>レース</option>
+            <option>ドリフト</option>
+          </select>
+        </div>
+      </div>
+      <div class="frow">
+        <div class="fg">
+          <div class="flbl">用途 <span class="opt">任意</span></div>
+          <select class="si" id="purpose">
+            <option value="">AI補完</option>
+            <option>ロードレース</option>
+            <option>クロスカントリー</option>
+            <option>オフロード</option>
+            <option>ストリート</option>
+            <option>峠</option>
+            <option>ドリフト</option>
+          </select>
+        </div>
+        <div class="fg">
+          <div class="flbl">コース種別 <span class="opt">任意</span></div>
+          <select class="si" id="courseType">
+            <option value="">AI補完</option>
+            <option>テクニカル（低速コーナー多め）</option>
+            <option>高速（ストレート・高速コーナー多め）</option>
+            <option>バランス（混合）</option>
+            <option>オフロード（未舗装・起伏あり）</option>
+          </select>
+        </div>
       </div>
       <div class="frow">
         <div class="fg">
@@ -452,6 +495,10 @@
               </select>
             </div>
           </div>
+          <div class="fg" style="margin-bottom:8px;">
+            <div class="flbl">自由記述 <span class="opt">任意</span></div>
+            <textarea class="notes-ta" id="fbNote" rows="2" placeholder="その他気になった点を自由に記述..."></textarea>
+          </div>
           <button class="btn btn-p" id="retuneBtn" style="max-width:220px;font-size:11px;">↻ フィードバック再チューニング</button>
         </div>
       </div>
@@ -472,12 +519,20 @@
 
 <script>
 // ─── STATE ───────────────────────────────────────────────
-let selCar = null, curTuning = null, clsFilter = 'ALL';
+let selCar = null, curTuning = null, prevTuning = null, clsFilter = 'ALL';
 let hist = JSON.parse(localStorage.getItem('fh6h') || '[]');
-let driverProfile = JSON.parse(localStorage.getItem('fh6dp') || 'null') || { grip: 30, stab: 40, brake: 50 };
+let driverProfile = JSON.parse(localStorage.getItem('fh6dp') || 'null') || { grip: 50, stab: 50, brake: 50 };
 let carNotes = JSON.parse(localStorage.getItem('fh6notes') || '{}');
 
 // ─── DRIVER PROFILE ──────────────────────────────────────
+function toggleCar() {
+  const body = document.getElementById('carBody');
+  const tog  = document.getElementById('carToggle');
+  const open = body.style.display === 'none';
+  body.style.display = open ? '' : 'none';
+  tog.textContent = open ? '▼' : '▲';
+}
+
 function toggleDP() {
   const body = document.getElementById('dpBody');
   const tog  = document.getElementById('dpToggle');
@@ -573,7 +628,10 @@ function getSpecs() {
     frontBias:  document.getElementById('frontBias').value || null,
     tires:      document.getElementById('tires').value || null,
     drivetrain: document.getElementById('drivetrain').value || null,
+    brakeType:  document.getElementById('brakeType').value || null,
+    diffType:   document.getElementById('diffType').value || null,
     purpose:    document.getElementById('purpose').value || null,
+    courseType: document.getElementById('courseType').value || null,
     gearCount:  document.getElementById('gearCount').value || null,
   };
 }
@@ -598,8 +656,9 @@ async function doTune(feedback) {
     });
     const d = await r.json();
     if (!r.ok || !d.tuning) throw new Error(d.error || 'API error');
+    prevTuning = feedback ? curTuning : null;
     curTuning = d.tuning;
-    renderTuning(d.tuning, d.model);
+    renderTuning(d.tuning, d.model, prevTuning);
     saveHist(d.tuning);
     if (d.model === 'gemini') toast('⚡ Claude上限のためGeminiで提案しました', '#8b5cf6');
   } catch(e) {
@@ -617,11 +676,12 @@ document.getElementById('retuneBtn').addEventListener('click', () => {
   doTune({
     handling: document.getElementById('fbH').value,
     braking:  document.getElementById('fbB').value,
-    speed:    document.getElementById('fbS').value
+    speed:    document.getElementById('fbS').value,
+    note:     document.getElementById('fbNote').value,
   });
 });
 document.getElementById('resetBtn').addEventListener('click', () => {
-  selCar = null; curTuning = null;
+  selCar = null; curTuning = null; prevTuning = null;
   document.getElementById('selCarBox').classList.remove('v');
   document.getElementById('resultBlock').classList.remove('v');
   document.getElementById('loadingState').classList.remove('v');
@@ -639,12 +699,12 @@ function bar(pct) {
   return `<div class="pbw"><div class="pb" style="width:${w}%"></div></div>`;
 }
 
-function pr(label, val, unit, pct, note) {
+function pr(label, val, unit, pct, note, changed) {
   const u = unit ? `<span class="pu"> ${unit}</span>` : '';
   const p = pct != null ? `<span class="pct">${Math.round(pct)}%</span>` : '';
   const b = pct != null ? bar(pct) : '';
   const n = note ? `<div class="pn">${note}</div>` : '';
-  return `<div class="pr"><span class="pl">${label}</span><span class="pv">${val}${u}</span>${p}${b}</div>${n}`;
+  return `<div class="pr${changed?' changed':''}"><span class="pl">${label}</span><span class="pv">${val}${u}</span>${p}${b}</div>${n}`;
 }
 
 function card(ttl, ico, html, fw, cp) {
@@ -652,7 +712,8 @@ function card(ttl, ico, html, fw, cp) {
   return `<div class="tcard${fw?' fw':''}"><div class="chdr"><span>${ico} ${ttl}</span>${cpBtn}</div><div class="cbdy">${html}</div></div>`;
 }
 
-function renderTuning(t, model) {
+function renderTuning(t, model, prev) {
+  const ch = (newVal, oldVal) => prev != null && newVal != null && oldVal != null && String(newVal) !== String(oldVal);
   document.getElementById('loadingState').classList.remove('v');
   document.getElementById('resultBlock').classList.add('v');
   document.getElementById('resName').textContent = selCar.make + ' ' + selCar.model;
@@ -679,63 +740,75 @@ function renderTuning(t, model) {
   const cp_diff = `■ デフ\n  F加速/減速: ${df.frontAccel?.value??'-'} / ${df.frontDecel?.value??'-'}\n  R加速/減速: ${df.rearAccel?.value??'-'} / ${df.rearDecel?.value??'-'}`;
   const cp_gear = `■ ギア\n  ファイナル: ${gr.finalDrive?.value??'-'}\n${(gr.ratios||[]).map((r,i)=>`  ${i+1}速: ${typeof r==='number'?r.toFixed(3):r}`).join('\n')}`;
 
+  const p_ = prev || {};
+  const ptp = p_.tirePressure||{}, parb = p_.arb||{}, psp = p_.springs||{}, pdm = p_.damping||{};
+  const pal = p_.alignment||{}, pae = p_.aero||{}, pbr = p_.brakes||{}, pdf = p_.diff||{}, pgr = p_.gears||{};
+
   g.innerHTML = [
     card('タイヤ空気圧','🫧',
-      pr('フロント', tp.front?.value??'-','Bar',tp.front?.percent,tp.front?.note)+
-      pr('リア',     tp.rear?.value??'-','Bar',tp.rear?.percent,tp.rear?.note),
+      pr('フロント', tp.front?.value??'-','Bar',tp.front?.percent,tp.front?.note, ch(tp.front?.value,ptp.front?.value))+
+      pr('リア',     tp.rear?.value??'-','Bar',tp.rear?.percent,tp.rear?.note,     ch(tp.rear?.value,ptp.rear?.value)),
       false, cp_tire),
 
     card('スタビライザー（ARB）','🔩',
-      pr('フロント', arb.front?.value??'-','',null,arb.front?.note)+
-      pr('リア',     arb.rear?.value??'-','',null,arb.rear?.note),
+      pr('フロント', arb.front?.value??'-','',null,arb.front?.note, ch(arb.front?.value,parb.front?.value))+
+      pr('リア',     arb.rear?.value??'-','',null,arb.rear?.note,   ch(arb.rear?.value,parb.rear?.value)),
       false, cp_arb),
 
     card('スプリング・車高','🌀',
-      pr('車高フロント',  sp.rideHeightFront?.value??'-','cm',null,sp.rideHeightFront?.note)+
-      pr('車高リア',      sp.rideHeightRear?.value??'-','cm',null,sp.rideHeightRear?.note)+
-      pr('スプリングF',   sp.front?.value??'-','kgf/mm',sp.front?.percent,sp.front?.note)+
-      pr('スプリングR',   sp.rear?.value??'-','kgf/mm',sp.rear?.percent,sp.rear?.note),
+      pr('車高フロント',sp.rideHeightFront?.value??'-','cm',null,sp.rideHeightFront?.note, ch(sp.rideHeightFront?.value,psp.rideHeightFront?.value))+
+      pr('車高リア',    sp.rideHeightRear?.value??'-','cm',null,sp.rideHeightRear?.note,   ch(sp.rideHeightRear?.value,psp.rideHeightRear?.value))+
+      pr('スプリングF', sp.front?.value??'-','kgf/mm',sp.front?.percent,sp.front?.note,   ch(sp.front?.value,psp.front?.value))+
+      pr('スプリングR', sp.rear?.value??'-','kgf/mm',sp.rear?.percent,sp.rear?.note,       ch(sp.rear?.value,psp.rear?.value)),
       false, cp_spr),
 
     card('ダンピング','📉',
-      pr('フロントバンプ',    dm.frontBump?.value??'-','',dm.frontBump?.percent,dm.frontBump?.note)+
-      pr('リアバンプ',        dm.rearBump?.value??'-','',dm.rearBump?.percent,dm.rearBump?.note)+
-      pr('フロントリバウンド',dm.frontRebound?.value??'-','',dm.frontRebound?.percent,dm.frontRebound?.note)+
-      pr('リアリバウンド',    dm.rearRebound?.value??'-','',dm.rearRebound?.percent,dm.rearRebound?.note),
+      pr('フロントバンプ',    dm.frontBump?.value??'-','',dm.frontBump?.percent,dm.frontBump?.note,       ch(dm.frontBump?.value,pdm.frontBump?.value))+
+      pr('リアバンプ',        dm.rearBump?.value??'-','',dm.rearBump?.percent,dm.rearBump?.note,           ch(dm.rearBump?.value,pdm.rearBump?.value))+
+      pr('フロントリバウンド',dm.frontRebound?.value??'-','',dm.frontRebound?.percent,dm.frontRebound?.note, ch(dm.frontRebound?.value,pdm.frontRebound?.value))+
+      pr('リアリバウンド',    dm.rearRebound?.value??'-','',dm.rearRebound?.percent,dm.rearRebound?.note,   ch(dm.rearRebound?.value,pdm.rearRebound?.value)),
       false, cp_dmp),
 
     card('アライメント','📐',
-      pr('フロントキャンバー',al.frontCamber?.value??'-','°',null,al.frontCamber?.note)+
-      pr('リアキャンバー',    al.rearCamber?.value??'-','°',null,al.rearCamber?.note)+
-      pr('フロントトー',      al.frontToe?.value??'-','°',null,al.frontToe?.note)+
-      pr('リアトー',          al.rearToe?.value??'-','°',null,al.rearToe?.note)+
-      pr('キャスター',        al.caster?.value??'-','°',null,al.caster?.note),
+      pr('フロントキャンバー',al.frontCamber?.value??'-','°',null,al.frontCamber?.note, ch(al.frontCamber?.value,pal.frontCamber?.value))+
+      pr('リアキャンバー',    al.rearCamber?.value??'-','°',null,al.rearCamber?.note,   ch(al.rearCamber?.value,pal.rearCamber?.value))+
+      pr('フロントトー',      al.frontToe?.value??'-','°',null,al.frontToe?.note,       ch(al.frontToe?.value,pal.frontToe?.value))+
+      pr('リアトー',          al.rearToe?.value??'-','°',null,al.rearToe?.note,         ch(al.rearToe?.value,pal.rearToe?.value))+
+      pr('キャスター',        al.caster?.value??'-','°',null,al.caster?.note,           ch(al.caster?.value,pal.caster?.value)),
       false, cp_aln),
 
     card('エアロ','💨',
-      pr('フロントダウンフォース',ae.frontDownforce?.value??'-','kg',ae.frontDownforce?.percent,ae.frontDownforce?.note)+
-      pr('リアダウンフォース',    ae.rearDownforce?.value??'-','kg',ae.rearDownforce?.percent,ae.rearDownforce?.note),
+      pr('フロントダウンフォース',ae.frontDownforce?.value??'-','kg',ae.frontDownforce?.percent,ae.frontDownforce?.note, ch(ae.frontDownforce?.value,pae.frontDownforce?.value))+
+      pr('リアダウンフォース',    ae.rearDownforce?.value??'-','kg',ae.rearDownforce?.percent,ae.rearDownforce?.note,   ch(ae.rearDownforce?.value,pae.rearDownforce?.value)),
       false, cp_aero),
 
     card('ブレーキ','🛑',
-      pr('バランス（前）',br.balance?.value??'-','%',null,br.balance?.note)+
-      pr('圧力',          br.pressure?.value??'-','%',br.pressure?.percent,br.pressure?.note),
+      pr('バランス（前）',br.balance?.value??'-','%',null,br.balance?.note,           ch(br.balance?.value,pbr.balance?.value))+
+      pr('圧力',          br.pressure?.value??'-','%',br.pressure?.percent,br.pressure?.note, ch(br.pressure?.value,pbr.pressure?.value)),
       false, cp_brk),
 
     card('デファレンシャル','⚙️',
-      pr('フロント加速',     df.frontAccel?.value??'-','%',df.frontAccel?.value,df.frontAccel?.note)+
-      pr('フロント減速',     df.frontDecel?.value??'-','%',df.frontDecel?.value,df.frontDecel?.note)+
-      pr('リア加速',         df.rearAccel?.value??'-','%',df.rearAccel?.value,df.rearAccel?.note)+
-      pr('リア減速',         df.rearDecel?.value??'-','%',df.rearDecel?.value,df.rearDecel?.note)+
-      (df.centerBalance ? pr('センターバランス',df.centerBalance?.value??'-','%',df.centerBalance?.value,df.centerBalance?.note) : ''),
+      pr('フロント加速',df.frontAccel?.value??'-','%',df.frontAccel?.value,df.frontAccel?.note, ch(df.frontAccel?.value,pdf.frontAccel?.value))+
+      pr('フロント減速',df.frontDecel?.value??'-','%',df.frontDecel?.value,df.frontDecel?.note, ch(df.frontDecel?.value,pdf.frontDecel?.value))+
+      pr('リア加速',    df.rearAccel?.value??'-','%',df.rearAccel?.value,df.rearAccel?.note,     ch(df.rearAccel?.value,pdf.rearAccel?.value))+
+      pr('リア減速',    df.rearDecel?.value??'-','%',df.rearDecel?.value,df.rearDecel?.note,     ch(df.rearDecel?.value,pdf.rearDecel?.value))+
+      (df.centerBalance ? pr('センターバランス',df.centerBalance?.value??'-','%',df.centerBalance?.value,df.centerBalance?.note, ch(df.centerBalance?.value,pdf.centerBalance?.value)) : ''),
       false, cp_diff),
 
     card('ギアレシオ','📊', (() => {
       const ratios = gr.ratios || [];
-      const rows = ratios.map((r,i) => `<tr><td style="color:var(--text3)">${i+1}速</td><td style="font-weight:700">${typeof r==='number'?r.toFixed(3):r}</td></tr>`).join('');
-      return pr('ファイナルドライブ', gr.finalDrive?.value??'-','',null,gr.finalDrive?.note) +
+      const prevRatios = pgr.ratios || [];
+      const rows = ratios.map((r,i) => {
+        const changed = prev && prevRatios[i] != null && String(r) !== String(prevRatios[i]);
+        return `<tr${changed?' style="color:#22c55e;font-weight:700"':''}><td style="color:var(--text3)">${i+1}速</td><td style="font-weight:700">${typeof r==='number'?r.toFixed(3):r}</td></tr>`;
+      }).join('');
+      return pr('ファイナルドライブ', gr.finalDrive?.value??'-','',null,gr.finalDrive?.note, ch(gr.finalDrive?.value,pgr.finalDrive?.value)) +
         (rows ? `<table class="gtbl"><tr><th>速</th><th>レシオ</th></tr>${rows}</table>` : '');
     })(), true, cp_gear),
+
+    ...(t.partsRecommendation ? [card('パーツ提案','🔧',
+      `<div style="font-size:11px;line-height:1.8;color:var(--text2);white-space:pre-wrap;">${t.partsRecommendation}</div>`,
+      true)] : []),
   ].join('');
 
   g.querySelectorAll('.card-cp').forEach(btn => {
